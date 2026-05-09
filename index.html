@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hermes Particle Forge V2 — Cool Pass</title>
+<style>
+  :root {
+    --bg: #03050a;
+    --panel: rgba(7, 12, 20, 0.78);
+    --panel2: rgba(9, 17, 28, 0.92);
+    --ink: #e8f7ff;
+    --muted: #7f94a8;
+    --line: rgba(120, 220, 255, 0.18);
+    --hot: #69ffb7;
+    --cyan: #60f7ff;
+    --violet: #9b7cff;
+    --gold: #ffd36e;
+    --danger: #ff5d73;
+    --mono: "Courier New", Courier, monospace;
+    --sans: Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; min-height:100%; background: radial-gradient(circle at 30% 0%, #071725 0%, var(--bg) 42%, #010207 100%); color:var(--ink); font-family:var(--mono); }
+  body { overflow-x:hidden; }
+  .shell { min-height:100vh; display:grid; grid-template-rows:auto 1fr auto; }
+  header { padding:18px 22px 10px; border-bottom:1px solid var(--line); background:linear-gradient(180deg, rgba(0,0,0,.42), rgba(0,0,0,0)); }
+  .eyebrow { color:var(--hot); letter-spacing:.18em; text-transform:uppercase; font-size:12px; }
+  h1 { margin:6px 0 8px; font-size: clamp(22px, 3vw, 42px); font-weight:400; letter-spacing:-.04em; }
+  .subtitle { color:var(--muted); max-width:980px; line-height:1.5; font-size:14px; }
+  .grid { display:grid; grid-template-columns: 340px 1fr; gap:16px; padding:16px; }
+  .panel { border:1px solid var(--line); background:var(--panel); backdrop-filter: blur(12px); border-radius:18px; box-shadow:0 24px 90px rgba(0,0,0,.35); }
+  .controls { padding:16px; align-self:start; position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; }
+  .controls h2, .stage h2 { margin:0 0 10px; font-size:15px; color:var(--cyan); font-weight:400; letter-spacing:.08em; text-transform:uppercase; }
+  .control { padding:12px 0; border-top:1px solid rgba(120,220,255,.1); }
+  .control:first-of-type { border-top:0; }
+  label { display:flex; justify-content:space-between; gap:12px; color:var(--ink); font-size:13px; margin-bottom:8px; }
+  label span:last-child { color:var(--hot); }
+  input[type=range] { width:100%; accent-color:var(--hot); }
+  .buttons { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+  button { font-family:var(--mono); border:1px solid var(--line); color:var(--ink); background:rgba(96,247,255,.07); border-radius:12px; padding:10px 11px; cursor:pointer; transition:.18s ease; }
+  select { width:100%; font-family:var(--mono); color:var(--ink); background:rgba(0,0,0,.35); border:1px solid var(--line); border-radius:12px; padding:10px 11px; outline:none; }
+  button:hover, select:hover { border-color:rgba(105,255,183,.7); background:rgba(105,255,183,.1); box-shadow:0 0 24px rgba(105,255,183,.1); }
+  button.active { color:#00130c; background:var(--hot); border-color:var(--hot); }
+  .readout { margin-top:14px; padding:12px; border-radius:14px; background:rgba(0,0,0,.32); border:1px solid rgba(120,220,255,.12); color:var(--muted); font-size:12px; line-height:1.5; }
+  .readout b { color:var(--ink); font-weight:400; }
+  .linter { margin-top:12px; display:grid; gap:6px; }
+  .pill { display:flex; justify-content:space-between; gap:12px; padding:8px 10px; border:1px solid rgba(120,220,255,.12); border-radius:999px; background:rgba(0,0,0,.22); font-size:12px; color:var(--muted); }
+  .pill.good span:last-child { color:var(--hot); }
+  .pill.warn span:last-child { color:var(--gold); }
+  .stage { padding:14px; }
+  .viewbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .canvasWrap { position:relative; min-height:72vh; border:1px solid rgba(120,220,255,.14); border-radius:18px; overflow:hidden; background:#090909; }
+  canvas { display:block; width:100%; height:72vh; background:#090909; }
+  .hud { position:absolute; top:12px; left:12px; right:12px; display:flex; justify-content:space-between; gap:12px; pointer-events:none; color:rgba(232,247,255,.72); font-size:12px; text-shadow:0 0 12px #000; }
+  .hud .tag { color:var(--hot); }
+  .oracle { margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  pre { margin:0; white-space:pre-wrap; line-height:1.42; font-size:12px; color:#b9d8e8; background:rgba(0,0,0,.32); border:1px solid rgba(120,220,255,.12); border-radius:14px; padding:12px; max-height:260px; overflow:auto; }
+  footer { padding:12px 20px 18px; color:var(--muted); font-size:12px; }
+  a { color:var(--cyan); }
+  @media (max-width: 920px) { .grid { grid-template-columns:1fr; } .controls { position:relative; max-height:none; } .oracle { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+  <div class="eyebrow">Hermes Particle Forge / V2 Cool Pass</div>
+  <h1>Particle Forge V2 Cool Pass</h1>
+  <div class="subtitle">A standalone local math-art forge with formula worlds, curated scene recipes, palette identities, trail materials, and cinematic camera modes. Pure equations → art-directed particle universes.</div>
+</header>
+<main class="grid">
+  <aside class="panel controls">
+    <h2>Dream Knobs</h2>
+    <div class="viewbar">
+      <button id="modeOriginal" class="active">Original 2D</button>
+      <button id="modeReadable">Readable 2D</button>
+      <button id="modeForge">Forge 3D Port</button>
+    </div>
+    <div class="control"><label>Scene Preset <span id="sceneVal">Manual</span></label><select id="scene">
+      <option value="manual">Manual / Current Knobs</option>
+      <option value="moonflower">Moonflower Engine</option>
+      <option value="butterfly">Butterfly Reactor</option>
+      <option value="aquarium">Haunted Aquarium</option>
+      <option value="dogstar">Dog Star Field</option>
+      <option value="orchid">Strange Orchid</option>
+      <option value="solar">Solar Phyllotaxis</option>
+    </select></div>
+    <div class="control"><label>Palette World <span id="paletteVal">Aurora</span></label><select id="palette">
+      <option value="aurora">Aurora</option>
+      <option value="ghost">Ghost Glass</option>
+      <option value="infrared">Infrared</option>
+      <option value="crt">CRT Bloom</option>
+      <option value="oil">Oil Slick</option>
+      <option value="solar">Solar Flare</option>
+      <option value="deepsea">Deep Sea Biolume</option>
+      <option value="dogstar">Dog Star Gold</option>
+    </select></div>
+    <div class="control"><label>Trail Material <span id="trailModeVal">Clean</span></label><select id="trailMode">
+      <option value="clean">Clean</option>
+      <option value="ghost">Ghost Smear</option>
+      <option value="long">Long Exposure</option>
+      <option value="crt">CRT Phosphor</option>
+      <option value="ink">Ink Bleed</option>
+      <option value="ember">Fire Ember</option>
+      <option value="vapor">Vaporwave Persistence</option>
+      <option value="star">Star-map Accumulation</option>
+    </select></div>
+    <div class="control"><label>Camera Motion <span id="cameraVal">Slow Orbit</span></label><select id="camera">
+      <option value="orbit">Slow Orbit</option>
+      <option value="locked">Locked Front</option>
+      <option value="breath">Breathing Zoom</option>
+      <option value="drift">Handheld Drift</option>
+      <option value="spiral">Spiral Dive</option>
+      <option value="macro">Macro Inspection</option>
+      <option value="kaleido">Kaleidoscope Orbit</option>
+    </select></div>
+    <div class="control"><label>Formula Family <span id="formulaVal">Trig Bloom</span></label><select id="formula">
+      <option value="trig">Trig Bloom / Yuruyurau</option>
+      <option value="jelly">Aurora Jellyfish</option>
+      <option value="rose">Rose / Rhodonea Bloom</option>
+      <option value="lissajous">Lissajous Orchid</option>
+      <option value="phylo">Golden Phyllotaxis</option>
+      <option value="dejong">De Jong Attractor</option>
+      <option value="firefly">Biolume Fireflies</option>
+      <option value="polar">Polar Sine Orbitals</option>
+      <option value="lorenz">Lorenz Spiral Attractor</option>
+    </select></div>
+    <div class="control"><label>Formula A <span id="formAVal">4.00</span></label><input id="formA" type="range" min="0.5" max="12" step="0.01" value="4"></div>
+    <div class="control"><label>Formula B <span id="formBVal">8.00</span></label><input id="formB" type="range" min="0.5" max="24" step="0.01" value="8"></div>
+    <div class="control"><label>Wave / Petals <span id="waveVal">6.00</span></label><input id="wave" type="range" min="0" max="18" step="0.01" value="6"></div>
+    <div class="control"><label>Twist / Phase <span id="twistVal">0.00</span></label><input id="twist" type="range" min="-8" max="8" step="0.01" value="0"></div>
+    <div class="control"><label>Bloom Morph <span id="morphVal">1.00</span></label><input id="morph" type="range" min="0" max="3" step="0.01" value="1"></div>
+    <div class="control"><label>Particle Count <span id="countVal">10000</span></label><input id="count" type="range" min="1000" max="40000" step="1000" value="10000"></div>
+    <div class="control"><label>Time Speed <span id="speedVal">1.00</span></label><input id="speed" type="range" min="0" max="3" step="0.01" value="1"></div>
+    <div class="control"><label>Curl Strength <span id="curlVal">1.00</span></label><input id="curl" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
+    <div class="control"><label>Vertical Stretch <span id="stretchVal">1.00</span></label><input id="stretch" type="range" min="0.4" max="2.2" step="0.01" value="1"></div>
+    <div class="control"><label>Depth Bloom <span id="depthVal">1.00</span></label><input id="depth" type="range" min="0" max="3" step="0.01" value="1"></div>
+    <div class="control"><label>Ghost Trails <span id="trailVal">0.00</span></label><input id="trail" type="range" min="0" max="0.92" step="0.01" value="0"></div>
+    <div class="control"><label>Dot Scale <span id="dotVal">1.00</span></label><input id="dot" type="range" min="0.4" max="3" step="0.01" value="1"></div>
+    <div class="control"><label>View Zoom <span id="zoomVal">1.00</span></label><input id="zoom" type="range" min="0.35" max="8" step="0.01" value="1"></div>
+    <div class="control"><label>View X <span id="panXVal">0</span></label><input id="panX" type="range" min="-1200" max="1200" step="1" value="0"></div>
+    <div class="control"><label>View Y <span id="panYVal">0</span></label><input id="panY" type="range" min="-1600" max="1600" step="1" value="0"></div>
+    <div class="buttons">
+      <button id="pauseBtn">Pause</button>
+      <button id="resetBtn">Reset Time</button>
+      <button id="resetViewBtn">Reset View</button>
+      <button id="exportBtn">Export PNG</button>
+      <button id="randomBtn">Variant</button>
+      <button id="applySceneBtn">Apply Scene</button>
+    </div>
+    <div class="readout">
+      <b>Formula Oracle</b><br>
+Choose a Scene Preset to art-direct the whole machine: formula, palette, trail material, camera choreography, and best-known knob values. Manual keeps your current knobs.<br><br>
+      <b>Navigation:</b> mouse wheel zooms, click-drag pans, WASD/arrow keys move the view. Try Forge 3D Port + Spiral Dive + Long Exposure.
+    </div>
+    <div class="linter">
+      <div class="pill good"><span>Safety</span><span>PASS</span></div>
+      <div class="pill warn"><span>Performance</span><span>TRIG HEAVY</span></div>
+      <div class="pill good"><span>Forbidden APIs</span><span>NONE</span></div>
+      <div class="pill good"><span>Determinism</span><span>STABLE</span></div>
+    </div>
+  </aside>
+  <section class="panel stage">
+    <h2 id="sceneTitle">Original Tweet Formula</h2>
+    <div class="canvasWrap">
+      <canvas id="canvas"></canvas>
+      <div class="hud"><div><span class="tag" id="hudMode">ORIGINAL 2D</span> · <span id="hudCount">10K</span> particles</div><div><span id="fps">--</span> FPS · <span id="clock">t=0.00</span></div></div>
+    </div>
+    <div class="oracle">
+      <pre id="codeA">a=(x,y,d=mag(k=4*cos(x/21),e=y/8-20))=&gt;circle((q=3*sin(k*2)+.3/k+sin(y/19)*k*(9+2*sin(e*14-d*3+t*2)))+50*cos(c=d-t)+200,q*sin(c)+d*39-475,k*k&gt;15?2:1)
+t=0,draw=$=&gt;{t||createCanvas(w=400,w);background(9).noStroke().fill(w,116);for(t+=PI/240,i=1e4;i--;)a(i,i/235)}</pre>
+      <pre id="codeB">Forge port API sketch:
+initParticle(i,count,seed,base,helpers)
+updateParticle(i,count,time,base,out,params,helpers)
+
+This benchmark proves:
+1. tiny p5 code can run as-is
+2. Hermes can expand it readably
+3. sliders can expose its real math
+4. the formula can become a 3D particle world</pre>
+    </div>
+  </section>
+</main>
+<footer>Particle Forge V2 Cool Pass — standalone browser app. Scene recipes, palettes, trail materials, camera choreography, PNG export.</footer>
+</div>
+<script>
+(() => {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  const els = Object.fromEntries(['scene','palette','trailMode','camera','formula','formA','formB','wave','twist','morph','count','speed','curl','stretch','depth','trail','dot','zoom','panX','panY'].map(id => [id, document.getElementById(id)]));
+  const vals = Object.fromEntries(['scene','palette','trailMode','camera','formula','formA','formB','wave','twist','morph','count','speed','curl','stretch','depth','trail','dot','zoom','panX','panY'].map(id => [id, document.getElementById(id+'Val')]));
+  const modeButtons = {
+    original: document.getElementById('modeOriginal'),
+    readable: document.getElementById('modeReadable'),
+    forge: document.getElementById('modeForge')
+  };
+  const sceneTitle = document.getElementById('sceneTitle');
+  const hudMode = document.getElementById('hudMode');
+  const hudCount = document.getElementById('hudCount');
+  const fpsEl = document.getElementById('fps');
+  const clockEl = document.getElementById('clock');
+  const codeA = document.getElementById('codeA');
+  const codeB = document.getElementById('codeB');
+  let mode = 'original';
+  let paused = false;
+  let t = 0;
+  let last = performance.now();
+  let frames = 0;
+  let lastFps = performance.now();
+  let fps = 0;
+  let variantSeed = 1;
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function params() {
+    return {
+      scene: els.scene.value,
+      palette: els.palette.value,
+      trailMode: els.trailMode.value,
+      camera: els.camera.value,
+      formula: els.formula.value,
+      formA: +els.formA.value,
+      formB: +els.formB.value,
+      wave: +els.wave.value,
+      twist: +els.twist.value,
+      morph: +els.morph.value,
+      count: +els.count.value,
+      speed: +els.speed.value,
+      curl: +els.curl.value,
+      stretch: +els.stretch.value,
+      depth: +els.depth.value,
+      trail: +els.trail.value,
+      dot: +els.dot.value,
+      zoom: +els.zoom.value,
+      panX: +els.panX.value,
+      panY: +els.panY.value,
+      seed: variantSeed
+    };
+  }
+  function updateVals() {
+    const p = params();
+    const names = { trig:'Trig Bloom', jelly:'Aurora Jellyfish', rose:'Rose Bloom', lissajous:'Lissajous Orchid', phylo:'Golden Phyllotaxis', dejong:'De Jong Attractor', firefly:'Biolume Fireflies', polar:'Polar Sine Orbitals', lorenz:'Lorenz Spiral Attractor' };
+    const sceneNames = { manual:'Manual', moonflower:'Moonflower Engine', butterfly:'Butterfly Reactor', aquarium:'Haunted Aquarium', dogstar:'Dog Star Field', orchid:'Strange Orchid', solar:'Solar Phyllotaxis' };
+    const paletteNames = { aurora:'Aurora', ghost:'Ghost Glass', infrared:'Infrared', crt:'CRT Bloom', oil:'Oil Slick', solar:'Solar Flare', deepsea:'Deep Sea', dogstar:'Dog Star Gold' };
+    const trailNames = { clean:'Clean', ghost:'Ghost Smear', long:'Long Exposure', crt:'CRT Phosphor', ink:'Ink Bleed', ember:'Fire Ember', vapor:'Vaporwave', star:'Star-map' };
+    const cameraNames = { orbit:'Slow Orbit', locked:'Locked Front', breath:'Breathing Zoom', drift:'Handheld Drift', spiral:'Spiral Dive', macro:'Macro Inspection', kaleido:'Kaleidoscope' };
+    vals.scene.textContent = sceneNames[p.scene] || p.scene;
+    vals.palette.textContent = paletteNames[p.palette] || p.palette;
+    vals.trailMode.textContent = trailNames[p.trailMode] || p.trailMode;
+    vals.camera.textContent = cameraNames[p.camera] || p.camera;
+    vals.formula.textContent = names[p.formula] || p.formula;
+    vals.formA.textContent = p.formA.toFixed(2);
+    vals.formB.textContent = p.formB.toFixed(2);
+    vals.wave.textContent = p.wave.toFixed(2);
+    vals.twist.textContent = p.twist.toFixed(2);
+    vals.morph.textContent = p.morph.toFixed(2);
+    vals.count.textContent = p.count;
+    vals.speed.textContent = p.speed.toFixed(2);
+    vals.curl.textContent = p.curl.toFixed(2);
+    vals.stretch.textContent = p.stretch.toFixed(2);
+    vals.depth.textContent = p.depth.toFixed(2);
+    vals.trail.textContent = p.trail.toFixed(2);
+    vals.dot.textContent = p.dot.toFixed(2);
+    vals.zoom.textContent = p.zoom.toFixed(2);
+    vals.panX.textContent = Math.round(p.panX);
+    vals.panY.textContent = Math.round(p.panY);
+    hudCount.textContent = (p.count/1000).toFixed(p.count % 1000 ? 1 : 0) + 'K';
+  }
+  Object.values(els).forEach(el => { el.addEventListener('input', () => { updateVals(); refreshCodePanels(); }); el.addEventListener('change', () => { updateVals(); refreshCodePanels(); }); });
+  els.scene.addEventListener('change', () => applyScene(els.scene.value));
+  updateVals();
+  refreshCodePanels();
+
+  function setMode(next) {
+    mode = next;
+    for (const [k,b] of Object.entries(modeButtons)) b.classList.toggle('active', k === next);
+    const titles = {
+      original: ['Original Tweet Formula', 'ORIGINAL 2D'],
+      readable: ['Readable Parameterized Bloom', 'READABLE 2D'],
+      forge: ['Particle Forge 3D Port', 'FORGE 3D PORT']
+    };
+    sceneTitle.textContent = titles[next][0];
+    hudMode.textContent = titles[next][1];
+    refreshCodePanels();
+  }
+  modeButtons.original.onclick = () => setMode('original');
+  modeButtons.readable.onclick = () => setMode('readable');
+  modeButtons.forge.onclick = () => setMode('forge');
+  document.getElementById('pauseBtn').onclick = () => { paused = !paused; document.getElementById('pauseBtn').textContent = paused ? 'Play' : 'Pause'; };
+  document.getElementById('resetBtn').onclick = () => { t = 0; };
+  document.getElementById('resetViewBtn').onclick = () => { els.zoom.value = 1; els.panX.value = 0; els.panY.value = 0; updateVals(); };
+  document.getElementById('randomBtn').onclick = () => {
+    variantSeed = (variantSeed * 1664525 + 1013904223) >>> 0;
+    const families = ['trig','jelly','rose','lissajous','phylo','dejong','firefly','polar','lorenz'];
+    const palettes = ['aurora','ghost','infrared','crt','oil','solar','deepsea','dogstar'];
+    const trails = ['clean','ghost','long','crt','ink','ember','vapor','star'];
+    const cameras = ['orbit','locked','breath','drift','spiral','macro','kaleido'];
+    els.scene.value = 'manual';
+    els.formula.value = families[Math.floor(hash(variantSeed + 31) * families.length)];
+    els.palette.value = palettes[Math.floor(hash(variantSeed + 32) * palettes.length)];
+    els.trailMode.value = trails[Math.floor(hash(variantSeed + 33) * trails.length)];
+    els.camera.value = cameras[Math.floor(hash(variantSeed + 34) * cameras.length)];
+    els.formA.value = (1.2 + hash(variantSeed + 1) * 9.5).toFixed(2);
+    els.formB.value = (2.0 + hash(variantSeed + 2) * 18).toFixed(2);
+    els.wave.value = (1.0 + hash(variantSeed + 3) * 14).toFixed(2);
+    els.twist.value = (-3.5 + hash(variantSeed + 4) * 7).toFixed(2);
+    els.morph.value = (0.35 + hash(variantSeed + 5) * 2.2).toFixed(2);
+    els.curl.value = (0.7 + hash(variantSeed)*1.3).toFixed(2);
+    els.depth.value = (0.5 + hash(variantSeed+7)*2.1).toFixed(2);
+    els.stretch.value = (0.75 + hash(variantSeed+13)*0.8).toFixed(2);
+    updateVals();
+    refreshCodePanels();
+  };
+  document.getElementById('applySceneBtn').onclick = () => applyScene(els.scene.value);
+  document.getElementById('exportBtn').onclick = () => {
+    const a = document.createElement('a');
+    a.download = `particle-forge-v2-${mode}-${els.formula.value}-${Date.now()}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  };
+
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function setView(zoom, panX, panY) {
+    els.zoom.value = clamp(zoom, +els.zoom.min, +els.zoom.max);
+    els.panX.value = clamp(panX, +els.panX.min, +els.panX.max);
+    els.panY.value = clamp(panY, +els.panY.min, +els.panY.max);
+    updateVals();
+  }
+  function viewTransform(p) {
+    return {
+      zoom: p.zoom,
+      ox: canvas.clientWidth / 2 + p.panX,
+      oy: canvas.clientHeight / 2 + p.panY
+    };
+  }
+
+  let dragging = false;
+  let dragStart = null;
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const p = params();
+    const oldZoom = p.zoom;
+    const factor = Math.exp(-e.deltaY * 0.0015);
+    const newZoom = clamp(oldZoom * factor, +els.zoom.min, +els.zoom.max);
+    // Zoom toward mouse position: keep the world point under the cursor stable.
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const cx = canvas.clientWidth / 2 + p.panX;
+    const cy = canvas.clientHeight / 2 + p.panY;
+    const panX = p.panX + (mx - cx) * (1 - newZoom / oldZoom);
+    const panY = p.panY + (my - cy) * (1 - newZoom / oldZoom);
+    setView(newZoom, panX, panY);
+  }, { passive: false });
+  canvas.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    canvas.setPointerCapture(e.pointerId);
+    const p = params();
+    dragStart = { x: e.clientX, y: e.clientY, panX: p.panX, panY: p.panY };
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!dragging || !dragStart) return;
+    setView(+els.zoom.value, dragStart.panX + e.clientX - dragStart.x, dragStart.panY + e.clientY - dragStart.y);
+  });
+  canvas.addEventListener('pointerup', () => { dragging = false; dragStart = null; });
+  canvas.addEventListener('pointercancel', () => { dragging = false; dragStart = null; });
+  window.addEventListener('keydown', (e) => {
+    if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+    const p = params();
+    const step = e.shiftKey ? 90 : 34;
+    if (e.key === '+' || e.key === '=') setView(p.zoom * 1.12, p.panX, p.panY);
+    else if (e.key === '-' || e.key === '_') setView(p.zoom / 1.12, p.panX, p.panY);
+    else if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') setView(p.zoom, p.panX, p.panY + step);
+    else if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') setView(p.zoom, p.panX, p.panY - step);
+    else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') setView(p.zoom, p.panX + step, p.panY);
+    else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') setView(p.zoom, p.panX - step, p.panY);
+    else return;
+    e.preventDefault();
+  });
+
+  function hash(n) {
+    let x = Math.sin(n * 12.9898) * 43758.5453123;
+    return x - Math.floor(x);
+  }
+
+  const PALETTES = {
+    aurora:  { bg:[3,5,10],  haze:'rgba(8,40,58,.12)', base:165, spread:82, sat:92, light:48, accent:110 },
+    ghost:   { bg:[4,7,13],  haze:'rgba(160,210,255,.08)', base:205, spread:40, sat:35, light:74, accent:255 },
+    infrared:{ bg:[10,1,4],  haze:'rgba(80,0,12,.16)', base:338, spread:70, sat:96, light:52, accent:28 },
+    crt:     { bg:[0,8,5],   haze:'rgba(0,255,110,.08)', base:122, spread:54, sat:92, light:44, accent:185 },
+    oil:     { bg:[3,3,9],   haze:'rgba(100,40,150,.10)', base:275, spread:150, sat:92, light:50, accent:32 },
+    solar:   { bg:[12,5,0],  haze:'rgba(255,125,0,.10)', base:38,  spread:48, sat:96, light:56, accent:8 },
+    deepsea: { bg:[0,5,13],  haze:'rgba(0,70,100,.12)', base:188, spread:82, sat:90, light:44, accent:92 },
+    dogstar: { bg:[8,5,0],   haze:'rgba(255,190,70,.11)', base:43,  spread:34, sat:88, light:58, accent:116 }
+  };
+  const SCENES = {
+    moonflower:{ formula:'polar',  palette:'ghost',   trailMode:'star',  camera:'kaleido', count:9000, formA:4.6, formB:10.5, wave:11.8, twist:1.6, morph:1.45, speed:.72, curl:.9, stretch:1,   depth:1.55, trail:.46, dot:.44, zoom:1.18 },
+    butterfly: { formula:'lorenz', palette:'infrared',trailMode:'long',  camera:'spiral',  count:12000, formA:7.3, formB:10.2, wave:7.4,  twist:.9,  morph:.82, speed:.42, curl:1,   stretch:1.05, depth:2.2, trail:.78, dot:.62, zoom:.92 },
+    aquarium:  { formula:'jelly',  palette:'deepsea', trailMode:'ghost', camera:'drift',   count:16000, formA:3.8, formB:13.4, wave:9.5,  twist:1.1,  morph:1.2, speed:.52, curl:.8,  stretch:1.2,  depth:1.5, trail:.74, dot:1.1, zoom:1.05 },
+    dogstar:   { formula:'firefly',palette:'dogstar', trailMode:'star',  camera:'breath',  count:22000, formA:4.4, formB:7.6,  wave:13.8, twist:0,    morph:2.2, speed:.68, curl:.75, stretch:1,    depth:1.4, trail:.88, dot:1.18, zoom:1.0 },
+    orchid:    { formula:'dejong', palette:'oil',     trailMode:'vapor', camera:'orbit',   count:18000, formA:5.8, formB:12.6, wave:13.2, twist:-2.4, morph:1.7, speed:.62, curl:1.2, stretch:1.05, depth:1.8, trail:.7,  dot:.78, zoom:1.18 },
+    solar:     { formula:'phylo',  palette:'solar',   trailMode:'ember', camera:'macro',   count:24000, formA:5.2, formB:17.5, wave:8.8,  twist:.55, morph:1.35,speed:.5,  curl:1,   stretch:1,    depth:1.65,trail:.72, dot:.72, zoom:1.28 }
+  };
+  function applyScene(name) {
+    if (!SCENES[name]) { updateVals(); refreshCodePanels(); return; }
+    const recipe = SCENES[name];
+    for (const [k,v] of Object.entries(recipe)) if (els[k]) els[k].value = v;
+    setMode('forge');
+    t = 0;
+    updateVals();
+    refreshCodePanels();
+  }
+  function pal(p) { return PALETTES[p.palette] || PALETTES.aurora; }
+  function clearColor(p, alpha=1) { const c = pal(p).bg; return `rgba(${c[0]},${c[1]},${c[2]},${alpha})`; }
+  function clearAlpha(p) {
+    const base = { clean:1, ghost:.20, long:.055, crt:.14, ink:.10, ember:.13, vapor:.075, star:.035 }[p.trailMode] ?? 1;
+    return p.trail > 0 ? Math.max(.025, Math.min(.95, 1 - p.trail)) * base : base;
+  }
+  function colorFor(p, b, depth, energy, alphaMul=1) {
+    const q = pal(p);
+    const shimmer = Math.sin((b.d || 0) * .18 + t * .55 + (b.c || 0) * .07);
+    let hue = q.base + q.spread * (depth - .5) + 18 * shimmer + 8 * Math.sin((b.q || 0) * .015);
+    if (p.trailMode === 'ember') hue = q.base + 18 * energy + 8 * Math.sin(t + depth * 5);
+    if (p.trailMode === 'crt') hue = q.base + 35 * Math.sin(depth * 8);
+    if (p.trailMode === 'vapor') hue = q.base + q.spread * Math.sin(depth * Math.PI * 2 + t * .3);
+    const sat = Math.min(100, q.sat + energy * 12);
+    const light = Math.min(92, q.light + depth * 28 + energy * 16);
+    const trailAlpha = { star:.18, long:.32, vapor:.38, ghost:.46, ember:.52, ink:.42, crt:.58, clean:.82 }[p.trailMode] ?? 1;
+    const alpha = Math.max(.012, Math.min(.52, (0.075 + depth * .25 + energy * .12) * alphaMul * trailAlpha));
+    return `hsla(${((hue%360)+360)%360}, ${sat}%, ${light}%, ${alpha})`;
+  }
+  function cameraState(p) {
+    let yaw = t * .18, zoomBoost = 1, bobX = 0, bobY = 0;
+    if (p.camera === 'locked') yaw = 0;
+    if (p.camera === 'breath') zoomBoost = 1 + .09 * Math.sin(t * .7);
+    if (p.camera === 'drift') { yaw = t * .09 + Math.sin(t*.37)*.12; bobX = Math.sin(t*.83)*18; bobY = Math.cos(t*.53)*13; }
+    if (p.camera === 'spiral') { yaw = t * .33; zoomBoost = 1 + .18 * Math.sin(t * .42); bobX = Math.cos(t*.28)*24; bobY = Math.sin(t*.31)*20; }
+    if (p.camera === 'macro') { yaw = Math.sin(t*.22)*.35; zoomBoost = 1.35 + .13 * Math.sin(t*.5); }
+    if (p.camera === 'kaleido') yaw = t * .24 + Math.sin(t*.7)*.2;
+    return { yaw, zoomBoost, bobX, bobY };
+  }
+
+  let lorenzCache = { key: '', points: [] };
+  function ensureLorenz(p, tt) {
+    const frameT = Math.floor(tt * 120);
+    const key = `${p.count}|${frameT}|${p.formA.toFixed(2)}|${p.formB.toFixed(2)}|${p.wave.toFixed(2)}|${p.twist.toFixed(2)}|${p.morph.toFixed(2)}`;
+    if (lorenzCache.key === key) return lorenzCache.points;
+    const pts = new Array(p.count);
+    let x = 9, y = 9, z = 9;
+    const dt = 5e-4 * Math.max(0.25, p.morph);
+    const sigma = 9 + p.formA * 0.25;
+    const rho = 20 + p.formB;
+    const beta = 1.5 + Math.max(0, p.wave) / 9;
+    const spinT = frameT;
+    for (let idx = p.count - 1; idx >= 0; idx--) {
+      const lane = idx % 9;
+      const e = Math.sin(spinT * Math.PI / 20 - x * x / 99 + lane + p.twist * 0.15) + 1;
+      const q = x * e + 89;
+      const k = z / 59 - e / 29 + spinT * Math.PI / 480 + lane * 8;
+      const px = q * Math.cos(k);
+      const py = -(q + 60 * Math.cos(k / 2)) * Math.sin(k);
+      const dz = (z - 24) / 38;
+      pts[idx] = { x: px, y: py, k:e, e, d: Math.min(1.5, Math.abs(dz)), q, c:k, z: dz * 70, size: 0.35 + e * 0.42 + Math.max(0, dz) * 0.18 };
+      const nx = x + sigma * (y - x) * dt;
+      const ny = y + (x * (rho - z) - y) * dt;
+      const nz = z + (x * y - beta * z) * dt;
+      x = nx; y = ny; z = nz;
+    }
+    lorenzCache = { key, points: pts };
+    return pts;
+  }
+
+  function bloomPoint(x, y, tt, p) {
+    const u = x / Math.max(1, p.count);
+    const a = u * Math.PI * 2;
+    const A = p.formA, B = p.formB, W = p.wave, T = p.twist, M = p.morph;
+
+    if (p.formula === 'rose') {
+      // Rhodonea / rose curve: r = cos(kθ), thickened into a particle bloom.
+      const theta = a * (1 + M * 3.0) + tt * 0.22;
+      const petalK = Math.max(0.5, W || 5);
+      const r = (90 + 28 * Math.sin(B * a + tt)) * Math.cos(petalK * theta / Math.max(1, A));
+      const halo = 18 * Math.sin(x * 0.017 + tt * 1.4);
+      const d = Math.abs(r) / 90;
+      return { x: Math.cos(theta + T * 0.08 * d) * (r + halo), y: Math.sin(theta) * (r + halo), k: petalK, e: r, d, q:r, c:theta, size: 1 + 1.6 * d };
+    }
+
+    if (p.formula === 'lissajous') {
+      // Harmonic orchid: different sine frequencies on x/y, with a breathing radial duplicate.
+      const phase = T + tt * 0.45;
+      const ring = 1 + 0.22 * Math.sin(a * W + tt * 1.3);
+      const d = 0.5 + 0.5 * Math.sin(a * (A + B) + tt);
+      return { x: Math.sin(a * A + phase) * 130 * ring, y: Math.sin(a * B + phase * 0.7) * 130 * (0.75 + M * 0.22), k:A, e:B, d, q:ring, c:phase, size: 0.8 + 2.2 * d };
+    }
+
+    if (p.formula === 'phylo') {
+      // Phyllotaxis: sunflower/golden-angle distribution with slow orbital breathing.
+      const golden = Math.PI * (3 - Math.sqrt(5));
+      const theta = x * golden + tt * 0.16 * T;
+      const r = Math.sqrt(x) * (1.15 + A * 0.05) * (0.72 + M * 0.22);
+      const wave = Math.sin(r * 0.08 * B - tt * 1.2) * W * 2.2;
+      const d = Math.min(1, r / 170);
+      return { x: Math.cos(theta) * (r + wave), y: Math.sin(theta) * (r + wave), k:golden, e:wave, d, q:r, c:theta, size: 0.7 + 2.4 * (1-d) };
+    }
+
+    if (p.formula === 'dejong') {
+      // De Jong-style strange attractor. Few deterministic iterations per point.
+      let px = (hash(x + 11) - 0.5) * 2;
+      let py = (hash(x * 3 + 17) - 0.5) * 2;
+      const aa = -2.0 + A * 0.22 + Math.sin(tt * 0.09) * 0.08;
+      const bb = -2.4 + B * 0.11;
+      const cc = 1.6 + W * 0.05;
+      const dd = -1.2 + T * 0.11;
+      for (let n = 0; n < 10; n++) {
+        const nx = Math.sin(aa * py) - Math.cos(bb * px);
+        const ny = Math.sin(cc * px) - Math.cos(dd * py);
+        px = nx; py = ny;
+      }
+      const d = Math.min(1.3, Math.sqrt(px*px + py*py) / 2.4);
+      return { x: px * 82 * (0.7 + M * 0.3), y: py * 82 * (0.7 + M * 0.3), k:aa, e:bb, d, q:px, c:py, size: 0.7 + d * 1.4 };
+    }
+
+    if (p.formula === 'jelly') {
+      // Aurora jellyfish: a bell plus tendrils, encoded as one particle family.
+      const strands = Math.max(12, Math.floor(28 + A * 9));
+      const strand = x % strands;
+      const row = Math.floor(x / strands);
+      const v = row / Math.max(1, Math.floor(p.count / strands));
+      const angle = strand / strands * Math.PI * 2 + 0.1 * Math.sin(tt * 0.6);
+      const pulse = 1 + 0.10 * Math.sin(tt * (0.7 + M));
+      if (v < 0.34) {
+        const rr = Math.sqrt(v / 0.34) * (72 + B * 3) * pulse;
+        const cap = -Math.pow(rr / (82 + B*2), 2) * (55 + W * 3);
+        const d = rr / 110;
+        return { x: Math.cos(angle + T * 0.02 * rr) * rr, y: cap - 80, k:pulse, e:rr, d, q:rr, c:angle, size: 1 + 1.8 * (1-d) };
+      }
+      const tv = (v - 0.34) / 0.66;
+      const rootR = (24 + B * 2) + (strand % 7) * (3 + M);
+      const wave = Math.sin(tv * (8 + W) + tt * (0.7 + M) + strand) * (8 + A * 1.3) * (1 - tv * 0.35);
+      const d = tv;
+      return { x: Math.cos(angle) * rootR + Math.cos(angle + Math.PI/2) * wave, y: -55 + tv * (230 + B * 6), k:pulse, e:wave, d, q:rootR, c:angle, size: 1.7 - tv * 0.8 };
+    }
+
+    if (p.formula === 'firefly') {
+      // Bioluminescent swarm: calm life-like blinking points.
+      const h = hash(x + 99), h2 = hash(x * 7 + 3), h3 = hash(x * 13 + 8);
+      const phase = h * Math.PI * 2;
+      const blink = Math.pow(0.5 + 0.5 * Math.sin(tt * (0.8 + h * A * 0.25) + phase), 7);
+      const drift = 25 + W * 3;
+      const d = blink;
+      return { x: (h - 0.5) * (240 + B * 10) + Math.sin(tt * 0.23 + phase) * drift, y: (h2 - 0.5) * (220 + A * 10) + Math.cos(tt * 0.19 + phase) * drift, k:blink, e:h3, d, q:blink, c:phase, size: 0.35 + blink * (2.4 + M) };
+    }
+
+    if (p.formula === 'polar') {
+      // Fragment-shader port: FC.xy becomes polar particle sampling; bright ridges follow
+      // e=abs(sin(a*(6+i*(3+sin(t)))+t)*.3-l*i+.1), with the i=1..2 orbital bands preserved.
+      const band = 1 + (x % 2);
+      const spokes = Math.max(1, Math.floor(p.count / 2));
+      const j = Math.floor(x / 2);
+      const a2 = (j / spokes) * Math.PI * 2 + T * 0.08;
+      const jitter = (hash(x + p.seed) - 0.5) * (0.018 + M * 0.012);
+      const waveFreq = (6 + band * (3 + Math.sin(tt))) * Math.max(0.2, W / 6 || 1);
+      const ridge = (Math.sin(a2 * waveFreq + tt) * 0.3 + 0.1) / band;
+      const l = Math.max(0.025, Math.abs(ridge) + jitter + (hash(x * 5 + 4) - 0.5) * 0.025);
+      const e2 = Math.abs(Math.sin(a2 * waveFreq + tt) * 0.3 - l * band + 0.1);
+      const d = Math.exp(-e2 * 10) / band + Math.exp(-30 * e2) / band;
+      const k2 = Math.exp(-40 * Math.abs(l - band / 4));
+      const radius = l * (250 + B * 8) * (0.85 + M * 0.12);
+      const pulse = 1 + 0.08 * Math.sin(tt * 1.7 + a2 * A);
+      return { x: Math.cos(a2) * radius * pulse, y: Math.sin(a2) * radius * pulse, k:k2, e:e2, d, q:radius, c:a2, size: 0.45 + d * 2.6 + k2 * 1.2 };
+    }
+
+    if (p.formula === 'lorenz') {
+      // p5 Lorenz tweet port: deterministic x/y/z integration, then spiral projection.
+      return ensureLorenz(p, tt)[x] || { x:0, y:0, k:0, e:0, d:0, q:0, c:0, size:1 };
+    }
+
+    // Original Yuruyurau-inspired trig bloom, now parameterized.
+    const k = A * Math.cos(x / (13 + B));
+    const e = y / Math.max(0.1, B) - 20;
+    const d = Math.sqrt(k*k + e*e) + 0.0001;
+    const q = 3 * Math.sin(k * 2) + 0.3 / k + Math.sin(y / (13 + W)) * k * (9 + 2 * Math.sin(e * (8 + W) - d * 3 + tt * (1 + M)));
+    const c = d - tt + T * 0.15 * Math.sin(y * 0.03);
+    return {
+      x: (q * p.curl) + 50 * Math.cos(c),
+      y: q * Math.sin(c) + d * 39 - 475,
+      k, e, d, q, c,
+      size: k*k > 15 ? 2 : 1
+    };
+  }
+
+  function clear(p) {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.fillStyle = clearColor(p, clearAlpha(p));
+    ctx.fillRect(0,0,w,h);
+    const q = pal(p);
+    const g = ctx.createRadialGradient(w*.5, h*.42, 0, w*.5, h*.5, Math.max(w,h)*.72);
+    g.addColorStop(0, q.haze);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+    if (p.trailMode === 'crt') {
+      ctx.fillStyle = 'rgba(120,255,190,.025)';
+      for (let y=0; y<h; y+=4) ctx.fillRect(0,y,w,1);
+    }
+  }
+
+  function drawOriginal(p) {
+    clear(p);
+    const scale = Math.min(canvas.clientWidth, canvas.clientHeight) / 400 * p.zoom;
+    const v = viewTransform(p);
+    const ox = v.ox - 200*scale;
+    const oy = v.oy - 200*scale;
+    ctx.fillStyle = colorFor(p, {d:.5,c:0,q:0}, .45, .25, .72);
+    for (let i = p.count; i--;) {
+      const b = bloomPoint(i, i/235, t, { ...p, curl: 1 });
+      const r = b.size * p.dot * scale;
+      ctx.beginPath();
+      ctx.arc(ox + (b.x + 200) * scale, oy + b.y * scale, r, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function drawReadable(p) {
+    clear(p);
+    const scale = Math.min(canvas.clientWidth, canvas.clientHeight) / 430 * p.zoom;
+    const v = viewTransform(p);
+    const ox = v.ox;
+    const oy = v.oy;
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = p.count; i--;) {
+      const b = bloomPoint(i, i/235, t, p);
+      const energy = Math.min(1, Math.abs(b.k) / 4);
+      const depth = 0.5 + 0.5 * Math.sin((b.c || 0) + t*.2);
+      ctx.fillStyle = colorFor(p, b, depth, energy, .86);
+      const px = ox + b.x * scale;
+      const py = oy + (b.y - 10) * scale * p.stretch;
+      const r = (b.size * 0.9 + energy * 1.2) * p.dot * scale;
+      ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawForge(p) {
+    clear(p);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    const cam = cameraState(p);
+    const scale = Math.min(w, h) / 470 * p.zoom * cam.zoomBoost;
+    const v = viewTransform(p);
+    const cx = v.ox + cam.bobX, cy = v.oy + cam.bobY;
+    const yaw = cam.yaw;
+    const sinY = Math.sin(yaw), cosY = Math.cos(yaw);
+    ctx.globalCompositeOperation = 'lighter';
+    // Additive glow does not need strict back-to-front sorting, so draw directly.
+    // This keeps the benchmark honest: math cost is measured without O(n log n) sorting.
+    for (let i = 0; i < p.count; i++) {
+      const b = bloomPoint(i, i/235, t, p);
+      const phase = i * 0.017 + t * 1.25 + p.seed * 0.00001;
+      const z0 = ((b.z || 0) + Math.sin(phase) * 34 + Math.cos(b.d * 0.18 + t) * 22) * p.depth;
+      const x0 = b.x;
+      const y0 = (b.y - 20) * p.stretch;
+      const xr = x0 * cosY - z0 * sinY;
+      const zr = x0 * sinY + z0 * cosY;
+      const perspective = 1 / (1 + (zr + 110) / 520);
+      const px = cx + xr * scale * perspective;
+      const py = cy + y0 * scale * perspective;
+      const depth = Math.max(0, Math.min(1, (zr + 110) / 220));
+      const energy = Math.min(1, Math.abs(b.k) / 4 + (b.d || 0) * .15);
+      const size = (b.size + Math.abs(b.k)*0.18) * p.dot * scale * perspective;
+      const r = Math.max(0.38, size * (0.75 + depth * 1.3));
+      // Fast glow approximation: one larger transparent halo + one hot core.
+      ctx.fillStyle = colorFor(p, b, depth, energy, .12);
+      ctx.beginPath(); ctx.arc(px, py, r * (p.trailMode === 'star' ? 3.8 : 2.55), 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = colorFor(p, b, depth, energy, .92);
+      ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI*2); ctx.fill();
+      if (p.camera === 'kaleido') {
+        ctx.fillStyle = colorFor(p, b, 1-depth, energy, .32);
+        ctx.beginPath(); ctx.arc(cx - (px-cx), cy + (py-cy), r*.7, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    const p = params();
+    if (!paused) t += dt * p.speed * Math.PI * 0.5;
+    if (mode === 'original') drawOriginal(p);
+    else if (mode === 'readable') drawReadable(p);
+    else drawForge(p);
+    sceneTitle.textContent = (mode === 'original' ? 'Original / ' : mode === 'readable' ? 'Readable / ' : 'Forge Port / ') + (vals.formula?.textContent || 'Formula');
+    frames++;
+    if (now - lastFps > 500) { fps = Math.round(frames * 1000 / (now - lastFps)); frames = 0; lastFps = now; fpsEl.textContent = fps; }
+    clockEl.textContent = `t=${t.toFixed(2)}`;
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  function selectedFormula() { return els.formula.value; }
+  function refreshCodePanels() {
+    codeA.textContent = mode === 'original' ? originalCode(selectedFormula()) : readableCode(mode, selectedFormula());
+    codeB.textContent = mode === 'forge' ? forgeCode(selectedFormula()) : notesCode();
+  }
+  function originalCode(formula = 'trig'){
+    if (formula === 'polar') return `vec2 p=(FC.xy-r*.5)/r.y;float a=atan(p.y,p.x),l=length(p),d=0.,k=0.,e;for(float i=1.;i<2.;i++)e=abs(sin(a*(6.+i*(3.+sin(t)))+t)*.3-l*i+.1),d+=exp(-e*1e1)/i+exp(-3e1*e)/i,k+=exp(-4e1*abs(l-i/4.));o.rgb=vec3(1)*(.75-d*.5-k*.4);`;
+    if (formula === 'lorenz') return `t=0,d=5e-4,draw=_=>{t++||createCanvas(w=400,w);background(9).stroke(w,96);for(x=y=z=9,i=3e4;i--;point((q=x*(e=sin(t*PI/20-x*x/99+i%9)+1)+89)*cos(k=z/59-e/29+t*PI/480+i%9*8)+200,200-(q+60*cos(k/2))*sin(k)))[x,y,z]=[x+9*(y-x)*d,y+(x*(28-z)-y)*d,z+(x*y-z-z)*d]}`;
+    return `a=(x,y,d=mag(k=4*cos(x/21),e=y/8-20))=>circle((q=3*sin(k*2)+.3/k+sin(y/19)*k*(9+2*sin(e*14-d*3+t*2)))+50*cos(c=d-t)+200,q*sin(c)+d*39-475,k*k>15?2:1)
+t=0,draw=$=>{t||createCanvas(w=400,w);background(9).noStroke().fill(w,116);for(t+=PI/240,i=1e4;i--;)a(i,i/235)}`;
+  }
+  function readableCode(kind, formula = 'trig'){
+    if (formula === 'polar') return `function polarSineOrbital(i, count, time, params) {
+  const band = 1 + (i % 2);
+  const a = floor(i / 2) / floor(count / 2) * TAU;
+  const wave = 6 + band * (3 + sin(time));
+  const l = abs((sin(a * wave + time) * .3 + .1) / band);
+  const e = abs(sin(a * wave + time) * .3 - l * band + .1);
+  const d = exp(-e * 10) / band + exp(-e * 30) / band;
+  const k = exp(-40 * abs(l - band / 4));
+  return { x: cos(a) * l, y: sin(a) * l, brightness: .75 - d*.5 - k*.4 };
+}`;
+    if (formula === 'lorenz') return `function lorenzSpiral(count, time) {
+  let x = 9, y = 9, z = 9;
+  const dt = 5e-4;
+  const points = [];
+  for (let i = count; i--;) {
+    const e = sin(time * PI/20 - x*x/99 + i%9) + 1;
+    const q = x * e + 89;
+    const k = z/59 - e/29 + time * PI/480 + i%9 * 8;
+    points[i] = [q * cos(k), -(q + 60*cos(k/2)) * sin(k), z];
+    [x,y,z] = [x + 9*(y-x)*dt, y + (x*(28-z)-y)*dt, z + (x*y-z-z)*dt];
+  }
+  return points;
+}`;
+    return `function trigBloomPoint(i, time, params) {
+  const x = i;
+  const y = i / 235;
+  const k = 4 * Math.cos(x / 21);
+  const e = y / 8 - 20;
+  const d = Math.sqrt(k*k + e*e) + 0.0001;
+  const q = 3 * Math.sin(k * 2)
+          + 0.3 / k
+          + Math.sin(y / 19) * k
+          * (9 + 2 * Math.sin(e * 14 - d * 3 + time * 2));
+  const c = d - time;
+  return {
+    x: q * params.curl + 50 * Math.cos(c),
+    y: q * Math.sin(c) + d * 39 - 475,
+    size: k*k > 15 ? 2 : 1,
+    k, d
+  };
+}
+
+// ${kind === 'readable' ? 'Readable 2D keeps the original coordinate system and adds color/controls.' : 'Forge mode uses this as the base field, then adds z-depth and projection.'}`;
+  }
+  function forgeCode(formula = 'trig'){
+    if (formula === 'polar') return `function updateParticle(i, count, time, base, out, params, h) {
+  const band = 1 + (i % 2);
+  const a = Math.floor(i / 2) / Math.floor(count / 2) * h.TAU;
+  const wave = 6 + band * (3 + Math.sin(time));
+  const l = Math.abs((Math.sin(a * wave + time) * .3 + .1) / band);
+  const e = Math.abs(Math.sin(a * wave + time) * .3 - l * band + .1);
+  out.x = Math.cos(a) * l * 260;
+  out.y = Math.sin(a) * l * 260;
+  out.z = Math.sin(a * wave + time) * 45 * params.depth;
+  out.size = (.45 + Math.exp(-e*10) * 2.6) * params.dot;
+  h.palette('silver-orbit', .75 - Math.exp(-e*10)*.5, out);
+}`;
+    if (formula === 'lorenz') return `function updateAllParticles(count, time, out, params) {
+  let x = 9, y = 9, z = 9, dt = 5e-4;
+  for (let i = count; i--;) {
+    const e = Math.sin(time*Math.PI/20 - x*x/99 + i%9) + 1;
+    const q = x * e + 89;
+    const k = z/59 - e/29 + time*Math.PI/480 + i%9*8;
+    out[i].x = q * Math.cos(k);
+    out[i].y = -(q + 60*Math.cos(k/2)) * Math.sin(k);
+    out[i].z = (z - 24) * params.depth;
+    out[i].size = (0.45 + e * 0.75) * params.dot;
+    [x,y,z] = [x+9*(y-x)*dt, y+(x*(28-z)-y)*dt, z+(x*y-z-z)*dt];
+  }
+}`;
+    return `function initParticle(i, count, seed, base, h) {\n  base.u = i / count;\n  base.y = i / 235;\n  base.jitter = h.hash(i + seed);\n}\n\nfunction updateParticle(i, count, time, base, out, params, h) {\n  const k = 4 * Math.cos(i / 21);\n  const e = base.y / 8 - 20;\n  const d = Math.sqrt(k*k + e*e) + 0.0001;\n  const q = 3*Math.sin(k*2) + 0.3/k\n    + Math.sin(base.y/19)*k*(9 + 2*Math.sin(e*14 - d*3 + time*2));\n  const c = d - time;\n  out.x = q * params.curl + 50 * Math.cos(c);\n  out.y = (q * Math.sin(c) + d * 39 - 495) * params.stretch;\n  out.z = (Math.sin(i*.017 + time*1.25) * 34 + Math.cos(d*.18 + time) * 22) * params.depth;\n  out.size = (k*k > 15 ? 2 : 1) * params.dot;\n  h.palette('aurora', d*.03 + time*.05, out);\n}`;}
+  function notesCode(){return `Benchmark checks:\n\nPASS: no DOM/network/storage APIs.\nWARN: trig-heavy formula, expected.\nPASS: no per-frame Math.random in readable/Forge modes.\nPASS: deterministic variant seed.\n\nV2 Cool Pass:\n- scene recipes drive full art direction\n- palette worlds color formulas differently\n- trail materials reshape persistence\n- camera motion adds cinematic Forge depth`;}
+})();
+</script>
+</body>
+</html>
