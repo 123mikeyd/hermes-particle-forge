@@ -50,6 +50,13 @@
   .quickStart { margin:8px 0 12px; padding:12px; border-radius:14px; color:#b9d8e8; background:rgba(96,247,255,.06); border:1px solid rgba(96,247,255,.16); font-size:12px; line-height:1.45; }
   .fieldHelp { margin-top:7px; color:var(--muted); font-size:11px; line-height:1.35; }
   .control.featured { padding:13px; margin:8px 0; border:1px solid rgba(105,255,183,.22); border-radius:14px; background:rgba(0,0,0,.24); }
+  textarea { width:100%; min-height:90px; resize:vertical; font-family:var(--mono); color:var(--ink); background:#050b13; border:1px solid rgba(105,255,183,.28); border-radius:12px; padding:10px; outline:none; }
+  body.gallery .controls, body.gallery header, body.gallery footer, body.gallery .oracle { display:none; }
+  body.gallery .grid { display:block; padding:0; }
+  body.gallery .stage { border:0; border-radius:0; min-height:100vh; padding:0; background:#000; }
+  body.gallery .canvasWrap { min-height:100vh; border:0; border-radius:0; }
+  body.gallery canvas { height:100vh; }
+  body.gallery .hud { font-size:13px; padding:10px; }
   .readout { margin-top:14px; padding:12px; border-radius:14px; background:rgba(0,0,0,.32); border:1px solid rgba(120,220,255,.12); color:var(--muted); font-size:12px; line-height:1.5; }
   .readout b { color:var(--ink); font-weight:400; }
   .linter { margin-top:12px; display:grid; gap:6px; }
@@ -79,12 +86,22 @@
 <main class="grid">
   <aside class="panel controls">
     <h2>Control Panel</h2>
-    <div class="quickStart"><b>Start here:</b> choose a Scene Preset, then switch to Forge 3D Port. Use Palette / Trail / Camera for big visual changes. Sliders are fine tuning.</div>
+    <div class="quickStart"><b>Start here:</b> choose a Scene Preset or Director Mode. Formula Blend, Mouse Warp, and Gallery Mode are the fun performance controls; sliders are fine tuning.</div>
     <div class="sectionTitle">Render Mode</div>
     <div class="viewbar">
       <button id="modeOriginal" class="active">Original 2D</button>
       <button id="modeReadable">Readable 2D</button>
       <button id="modeForge">Forge 3D Port</button>
+    </div>
+    <div class="control featured"><label>Director Mode <span id="directorVal">Off</span></label><select id="director">
+      <option value="off">Off</option>
+      <option value="slow">Slow Tour</option>
+      <option value="chaos">Chaos Tour</option>
+      <option value="ambient">Ambient Tour</option>
+    </select><div class="fieldHelp">Auto-tours curated scenes. It starts from safe tuned recipes instead of ugly random defaults.</div></div>
+    <div class="buttons">
+      <button id="galleryBtn">Hide UI / Gallery</button>
+      <button id="fullscreenBtn">Fullscreen</button>
     </div>
     <div class="sectionTitle">1. Finished Scenes</div>
     <div class="control featured"><label>Scene Preset <span id="sceneVal">Manual</span></label><select id="scene">
@@ -126,6 +143,13 @@
       <option value="macro">Macro Inspection</option>
       <option value="kaleido">Kaleidoscope Orbit</option>
     </select><div class="fieldHelp">Changes movement: locked, orbiting, breathing, drifting, diving, macro, or mirrored kaleidoscope.</div></div>
+    <div class="control featured"><label>Mouse Warp <span id="mouseModeVal">Swirl</span></label><select id="mouseMode">
+      <option value="off">Off</option>
+      <option value="attract">Attract</option>
+      <option value="repel">Repel</option>
+      <option value="swirl" selected>Swirl</option>
+    </select><div class="fieldHelp">Move the mouse over the canvas to bend the particle field.</div></div>
+    <div class="control"><label>Mouse Strength <span id="mouseStrengthVal">0.65</span></label><input id="mouseStrength" type="range" min="0" max="2" step="0.01" value="0.65"></div>
     <div class="sectionTitle">3. Math Engine</div>
     <div class="control"><label>Formula Family <span id="formulaVal">Trig Bloom</span></label><select id="formula">
       <option value="trig">Trig Bloom / Yuruyurau</option>
@@ -138,6 +162,26 @@
       <option value="polar">Polar Sine Orbitals</option>
       <option value="lorenz">Lorenz Spiral Attractor</option>
     </select><div class="fieldHelp">The base equation. Use Scene Presets first; use this for experiments.</div></div>
+    <div class="control featured"><label>Formula Blend <span id="blendEnabledVal">Off</span></label><select id="blendEnabled">
+      <option value="off">Off</option>
+      <option value="on">On</option>
+    </select><div class="fieldHelp">Mixes this formula with a second equation for hybrid creatures.</div></div>
+    <div class="control"><label>Blend Target <span id="formulaBVal">Polar Sine Orbitals</span></label><select id="formulaB">
+      <option value="polar">Polar Sine Orbitals</option>
+      <option value="lorenz">Lorenz Spiral Attractor</option>
+      <option value="jelly">Aurora Jellyfish</option>
+      <option value="rose">Rose / Rhodonea Bloom</option>
+      <option value="dejong">De Jong Attractor</option>
+      <option value="firefly">Biolume Fireflies</option>
+      <option value="phylo">Golden Phyllotaxis</option>
+      <option value="trig">Trig Bloom / Yuruyurau</option>
+      <option value="lissajous">Lissajous Orchid</option>
+    </select></div>
+    <div class="control"><label>Blend Amount <span id="blendVal">0.35</span></label><input id="blend" type="range" min="0" max="1" step="0.01" value="0.35"></div>
+    <div class="control"><label>Auto Morph <span id="autoMorphVal">Off</span></label><select id="autoMorph">
+      <option value="off">Off</option>
+      <option value="on">On</option>
+    </select><div class="fieldHelp">Animates the blend amount over time.</div></div>
     <div class="sectionTitle">4. Fine Tuning</div>
     <div class="control"><label>Formula A <span id="formAVal">4.00</span></label><input id="formA" type="range" min="0.5" max="12" step="0.01" value="4"></div>
     <div class="control"><label>Formula B <span id="formBVal">8.00</span></label><input id="formB" type="range" min="0.5" max="24" step="0.01" value="8"></div>
@@ -155,6 +199,7 @@
     <div class="control"><label>View Zoom <span id="zoomVal">1.00</span></label><input id="zoom" type="range" min="0.35" max="8" step="0.01" value="1"></div>
     <div class="control"><label>Pan X <span id="panXVal">0</span></label><input id="panX" type="range" min="-1200" max="1200" step="1" value="0"></div>
     <div class="control"><label>Pan Y <span id="panYVal">0</span></label><input id="panY" type="range" min="-1600" max="1600" step="1" value="0"></div>
+    <div class="control"><label>Recipe JSON <span>copy / paste</span></label><textarea id="recipeText" placeholder="Click Copy Recipe, or paste a saved recipe then Load Recipe."></textarea></div>
     <div class="buttons">
       <button id="pauseBtn">Pause</button>
       <button id="resetBtn">Reset Time</button>
@@ -162,6 +207,10 @@
       <button id="exportBtn">Export PNG</button>
       <button id="randomBtn">Variant</button>
       <button id="applySceneBtn">Load Scene</button>
+      <button id="copyRecipeBtn">Copy Recipe</button>
+      <button id="loadRecipeBtn">Load Recipe</button>
+      <button id="saveLocalBtn">Save Local</button>
+      <button id="loadLocalBtn">Load Local</button>
     </div>
     <div class="readout">
       <b>How to use</b><br>
@@ -205,8 +254,8 @@ This benchmark proves:
 (() => {
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d', { alpha: false });
-  const els = Object.fromEntries(['scene','palette','trailMode','camera','formula','formA','formB','wave','twist','morph','count','speed','curl','stretch','depth','trail','dot','zoom','panX','panY'].map(id => [id, document.getElementById(id)]));
-  const vals = Object.fromEntries(['scene','palette','trailMode','camera','formula','formA','formB','wave','twist','morph','count','speed','curl','stretch','depth','trail','dot','zoom','panX','panY'].map(id => [id, document.getElementById(id+'Val')]));
+  const els = Object.fromEntries(['scene','director','palette','trailMode','camera','mouseMode','mouseStrength','formula','blendEnabled','formulaB','blend','autoMorph','formA','formB','wave','twist','morph','count','speed','curl','stretch','depth','trail','dot','zoom','panX','panY'].map(id => [id, document.getElementById(id)]));
+  const vals = Object.fromEntries(['scene','director','palette','trailMode','camera','mouseMode','mouseStrength','formula','blendEnabled','formulaB','blend','autoMorph','formA','formB','wave','twist','morph','count','speed','curl','stretch','depth','trail','dot','zoom','panX','panY'].map(id => [id, document.getElementById(id+'Val')]));
   const modeButtons = {
     original: document.getElementById('modeOriginal'),
     readable: document.getElementById('modeReadable'),
@@ -219,6 +268,7 @@ This benchmark proves:
   const clockEl = document.getElementById('clock');
   const codeA = document.getElementById('codeA');
   const codeB = document.getElementById('codeB');
+  const recipeText = document.getElementById('recipeText');
   let mode = 'original';
   let paused = false;
   let t = 0;
@@ -241,10 +291,17 @@ This benchmark proves:
   function params() {
     return {
       scene: els.scene.value,
+      director: els.director.value,
       palette: els.palette.value,
       trailMode: els.trailMode.value,
       camera: els.camera.value,
+      mouseMode: els.mouseMode.value,
+      mouseStrength: +els.mouseStrength.value,
       formula: els.formula.value,
+      blendEnabled: els.blendEnabled.value,
+      formulaB: els.formulaB.value,
+      blend: +els.blend.value,
+      autoMorph: els.autoMorph.value,
       formA: +els.formA.value,
       formB: +els.formB.value,
       wave: +els.wave.value,
@@ -270,6 +327,16 @@ This benchmark proves:
     const paletteNames = { aurora:'Aurora', ghost:'Ghost Glass', infrared:'Infrared', crt:'CRT Bloom', oil:'Oil Slick', solar:'Solar Flare', deepsea:'Deep Sea', dogstar:'Dog Star Gold' };
     const trailNames = { clean:'Clean', ghost:'Ghost Smear', long:'Long Exposure', crt:'CRT Phosphor', ink:'Ink Bleed', ember:'Fire Ember', vapor:'Vaporwave', star:'Star-map' };
     const cameraNames = { orbit:'Slow Orbit', locked:'Locked Front', breath:'Breathing Zoom', drift:'Handheld Drift', spiral:'Spiral Dive', macro:'Macro Inspection', kaleido:'Kaleidoscope' };
+    const directorNames = { off:'Off', slow:'Slow Tour', chaos:'Chaos Tour', ambient:'Ambient Tour' };
+    const mouseNames = { off:'Off', attract:'Attract', repel:'Repel', swirl:'Swirl' };
+    const yesNo = { off:'Off', on:'On' };
+    vals.director.textContent = directorNames[p.director] || p.director;
+    vals.mouseMode.textContent = mouseNames[p.mouseMode] || p.mouseMode;
+    vals.mouseStrength.textContent = p.mouseStrength.toFixed(2);
+    vals.blendEnabled.textContent = yesNo[p.blendEnabled] || p.blendEnabled;
+    vals.formulaB.textContent = names[p.formulaB] || p.formulaB;
+    vals.blend.textContent = p.blend.toFixed(2);
+    vals.autoMorph.textContent = yesNo[p.autoMorph] || p.autoMorph;
     vals.scene.textContent = sceneNames[p.scene] || p.scene;
     vals.palette.textContent = paletteNames[p.palette] || p.palette;
     vals.trailMode.textContent = trailNames[p.trailMode] || p.trailMode;
@@ -294,6 +361,8 @@ This benchmark proves:
   }
   Object.values(els).forEach(el => { el.addEventListener('input', () => { updateVals(); refreshCodePanels(); }); el.addEventListener('change', () => { updateVals(); refreshCodePanels(); }); });
   els.scene.addEventListener('change', () => applyScene(els.scene.value));
+  els.director.addEventListener('change', () => { directorState.last = 0; if (els.director.value !== 'off') applyScene(directorSceneList()[0], { keepDirector:true }); });
+  els.blendEnabled.addEventListener('change', () => applyBlendDefaults());
   updateVals();
   refreshCodePanels();
 
@@ -344,6 +413,15 @@ This benchmark proves:
     a.href = canvas.toDataURL('image/png');
     a.click();
   };
+  document.getElementById('galleryBtn').onclick = () => { document.body.classList.toggle('gallery'); resize(); };
+  document.getElementById('fullscreenBtn').onclick = () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  };
+  document.getElementById('copyRecipeBtn').onclick = () => { recipeText.value = JSON.stringify(currentRecipe(), null, 2); recipeText.select(); navigator.clipboard?.writeText(recipeText.value).catch(()=>{}); };
+  document.getElementById('loadRecipeBtn').onclick = () => loadRecipeFromText();
+  document.getElementById('saveLocalBtn').onclick = () => { const r = JSON.stringify(currentRecipe(), null, 2); localStorage.setItem('particleForgeV2Recipe', r); recipeText.value = r; };
+  document.getElementById('loadLocalBtn').onclick = () => { recipeText.value = localStorage.getItem('particleForgeV2Recipe') || ''; if (recipeText.value) loadRecipeFromText(); };
 
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
   function setView(zoom, panX, panY) {
@@ -360,6 +438,7 @@ This benchmark proves:
     };
   }
 
+  let pointer = { x:0, y:0, active:false, down:false };
   let dragging = false;
   let dragStart = null;
   canvas.addEventListener('wheel', (e) => {
@@ -379,17 +458,20 @@ This benchmark proves:
     setView(newZoom, panX, panY);
   }, { passive: false });
   canvas.addEventListener('pointerdown', (e) => {
+    const rect = canvas.getBoundingClientRect(); pointer = { x:e.clientX - rect.left, y:e.clientY - rect.top, active:true, down:true };
     dragging = true;
     canvas.setPointerCapture(e.pointerId);
     const p = params();
     dragStart = { x: e.clientX, y: e.clientY, panX: p.panX, panY: p.panY };
   });
   canvas.addEventListener('pointermove', (e) => {
+    const rect = canvas.getBoundingClientRect(); pointer.x = e.clientX - rect.left; pointer.y = e.clientY - rect.top; pointer.active = true;
     if (!dragging || !dragStart) return;
     setView(+els.zoom.value, dragStart.panX + e.clientX - dragStart.x, dragStart.panY + e.clientY - dragStart.y);
   });
-  canvas.addEventListener('pointerup', () => { dragging = false; dragStart = null; });
-  canvas.addEventListener('pointercancel', () => { dragging = false; dragStart = null; });
+  canvas.addEventListener('pointerup', () => { dragging = false; dragStart = null; pointer.down = false; });
+  canvas.addEventListener('pointercancel', () => { dragging = false; dragStart = null; pointer.down = false; });
+  canvas.addEventListener('pointerleave', () => { pointer.active = false; });
   window.addEventListener('keydown', (e) => {
     if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
     const p = params();
@@ -400,6 +482,9 @@ This benchmark proves:
     else if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') setView(p.zoom, p.panX, p.panY - step);
     else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') setView(p.zoom, p.panX + step, p.panY);
     else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') setView(p.zoom, p.panX - step, p.panY);
+    else if (e.key.toLowerCase() === 'g') { document.body.classList.toggle('gallery'); resize(); }
+    else if (e.key.toLowerCase() === 'f') setMode('forge');
+    else if (e.key === ' ') { paused = !paused; document.getElementById('pauseBtn').textContent = paused ? 'Play' : 'Pause'; }
     else return;
     e.preventDefault();
   });
@@ -407,6 +492,46 @@ This benchmark proves:
   function hash(n) {
     let x = Math.sin(n * 12.9898) * 43758.5453123;
     return x - Math.floor(x);
+  }
+
+  let directorState = { last:0, index:0 };
+  function directorSceneList() {
+    if (els.director.value === 'chaos') return ['butterfly','orchid','moonflower','solar','aquarium','dogstar'];
+    if (els.director.value === 'ambient') return ['aquarium','dogstar','moonflower','solar'];
+    return ['moonflower','butterfly','aquarium','orchid','dogstar','solar'];
+  }
+  function updateDirector(now) {
+    const modeName = els.director.value;
+    if (modeName === 'off') return;
+    const hold = modeName === 'chaos' ? 9000 : modeName === 'ambient' ? 18000 : 14000;
+    if (!directorState.last) { directorState.last = now; return; }
+    if (now - directorState.last > hold) {
+      const list = directorSceneList();
+      directorState.index = (directorState.index + 1) % list.length;
+      applyScene(list[directorState.index], { keepDirector:true });
+      directorState.last = now;
+    }
+  }
+  function applyBlendDefaults() {
+    if (els.blendEnabled.value !== 'on') return;
+    if (els.formula.value === els.formulaB.value) els.formulaB.value = els.formula.value === 'polar' ? 'lorenz' : 'polar';
+    els.blend.value = els.autoMorph.value === 'on' ? .5 : .35;
+    els.count.value = Math.min(+els.count.value || 10000, 14000);
+    els.dot.value = Math.min(+els.dot.value || 1, .8);
+    updateVals(); refreshCodePanels();
+  }
+  function currentRecipe() {
+    const p = params();
+    return { version:2, mode, values: Object.fromEntries(Object.keys(els).map(k => [k, els[k].value])) };
+  }
+  function loadRecipeFromText() {
+    try {
+      const r = JSON.parse(recipeText.value);
+      const values = r.values || r;
+      for (const [k,v] of Object.entries(values)) if (els[k]) els[k].value = v;
+      if (r.mode) setMode(r.mode);
+      updateVals(); refreshCodePanels();
+    } catch (e) { recipeText.value = 'Recipe parse error: ' + e.message; }
   }
 
   const PALETTES = {
@@ -427,10 +552,17 @@ This benchmark proves:
     orchid:    { formula:'dejong', palette:'oil',     trailMode:'vapor', camera:'orbit',   count:18000, formA:5.8, formB:12.6, wave:13.2, twist:-2.4, morph:1.7, speed:.62, curl:1.2, stretch:1.05, depth:1.8, trail:.7,  dot:.78, zoom:1.18 },
     solar:     { formula:'phylo',  palette:'solar',   trailMode:'ember', camera:'macro',   count:24000, formA:5.2, formB:17.5, wave:8.8,  twist:.55, morph:1.35,speed:.5,  curl:1,   stretch:1,    depth:1.65,trail:.72, dot:.72, zoom:1.28 }
   };
-  function applyScene(name) {
+  function applyScene(name, opts={}) {
     if (!SCENES[name]) { updateVals(); refreshCodePanels(); return; }
     const recipe = SCENES[name];
     for (const [k,v] of Object.entries(recipe)) if (els[k]) els[k].value = v;
+    els.scene.value = name;
+    if (opts.keepDirector) els.director.value = els.director.value;
+    els.blendEnabled.value = 'off';
+    els.autoMorph.value = 'off';
+    els.blend.value = .35;
+    els.mouseMode.value = recipe.mouseMode || 'swirl';
+    els.mouseStrength.value = recipe.mouseStrength || .65;
     setMode('forge');
     t = 0;
     updateVals();
@@ -496,7 +628,7 @@ This benchmark proves:
     return pts;
   }
 
-  function bloomPoint(x, y, tt, p) {
+  function formulaPoint(x, y, tt, p) {
     const u = x / Math.max(1, p.count);
     const a = u * Math.PI * 2;
     const A = p.formA, B = p.formB, W = p.wave, T = p.twist, M = p.morph;
@@ -615,6 +747,38 @@ This benchmark proves:
     };
   }
 
+  function lerpObj(a, b, m) {
+    return {
+      x: a.x + (b.x - a.x) * m,
+      y: a.y + (b.y - a.y) * m,
+      z: (a.z || 0) + ((b.z || 0) - (a.z || 0)) * m,
+      k: (a.k || 0) + ((b.k || 0) - (a.k || 0)) * m,
+      e: (a.e || 0) + ((b.e || 0) - (a.e || 0)) * m,
+      d: (a.d || 0) + ((b.d || 0) - (a.d || 0)) * m,
+      q: (a.q || 0) + ((b.q || 0) - (a.q || 0)) * m,
+      c: (a.c || 0) + ((b.c || 0) - (a.c || 0)) * m,
+      size: (a.size || 1) + ((b.size || 1) - (a.size || 1)) * m
+    };
+  }
+  function bloomPoint(x, y, tt, p) {
+    const a = formulaPoint(x, y, tt, p);
+    if (p.blendEnabled !== 'on') return a;
+    const m = p.autoMorph === 'on' ? 0.5 + 0.5 * Math.sin(tt * 0.33) : p.blend;
+    const b = formulaPoint(x, y, tt + 0.7, { ...p, formula: p.formulaB || 'polar' });
+    return lerpObj(a, b, m);
+  }
+  function mouseWarp(px, py, p) {
+    if (!pointer.active || p.mouseMode === 'off' || p.mouseStrength <= 0) return [px, py];
+    const dx = px - pointer.x, dy = py - pointer.y;
+    const dist = Math.sqrt(dx*dx + dy*dy) + 0.0001;
+    const radius = 130 + p.mouseStrength * 160;
+    if (dist > radius) return [px, py];
+    const f = Math.pow(1 - dist / radius, 2) * p.mouseStrength * (pointer.down ? 1.7 : 1);
+    if (p.mouseMode === 'attract') return [px - dx * f * .38, py - dy * f * .38];
+    if (p.mouseMode === 'repel') return [px + dx * f * .55, py + dy * f * .55];
+    const ang = f * 1.4; const ca = Math.cos(ang), sa = Math.sin(ang);
+    return [pointer.x + dx * ca - dy * sa, pointer.y + dx * sa + dy * ca];
+  }
   function clear(p) {
     const w = canvas.clientWidth, h = canvas.clientHeight;
     ctx.fillStyle = clearColor(p, clearAlpha(p));
@@ -659,8 +823,9 @@ This benchmark proves:
       const energy = Math.min(1, Math.abs(b.k) / 4);
       const depth = 0.5 + 0.5 * Math.sin((b.c || 0) + t*.2);
       ctx.fillStyle = colorFor(p, b, depth, energy, .86);
-      const px = ox + b.x * scale;
-      const py = oy + (b.y - 10) * scale * p.stretch;
+      let px = ox + b.x * scale;
+      let py = oy + (b.y - 10) * scale * p.stretch;
+      [px, py] = mouseWarp(px, py, p);
       const r = (b.size * 0.9 + energy * 1.2) * p.dot * scale;
       ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI*2); ctx.fill();
     }
@@ -688,8 +853,9 @@ This benchmark proves:
       const xr = x0 * cosY - z0 * sinY;
       const zr = x0 * sinY + z0 * cosY;
       const perspective = 1 / (1 + (zr + 110) / 520);
-      const px = cx + xr * scale * perspective;
-      const py = cy + y0 * scale * perspective;
+      let px = cx + xr * scale * perspective;
+      let py = cy + y0 * scale * perspective;
+      [px, py] = mouseWarp(px, py, p);
       const depth = Math.max(0, Math.min(1, (zr + 110) / 220));
       const energy = Math.min(1, Math.abs(b.k) / 4 + (b.d || 0) * .15);
       const size = (b.size + Math.abs(b.k)*0.18) * p.dot * scale * perspective;
@@ -710,6 +876,7 @@ This benchmark proves:
   function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
+    updateDirector(now);
     const p = params();
     if (!paused) t += dt * p.speed * Math.PI * 0.5;
     if (mode === 'original') drawOriginal(p);
@@ -806,7 +973,7 @@ t=0,draw=$=>{t||createCanvas(w=400,w);background(9).noStroke().fill(w,116);for(t
   }
 }`;
     return `function initParticle(i, count, seed, base, h) {\n  base.u = i / count;\n  base.y = i / 235;\n  base.jitter = h.hash(i + seed);\n}\n\nfunction updateParticle(i, count, time, base, out, params, h) {\n  const k = 4 * Math.cos(i / 21);\n  const e = base.y / 8 - 20;\n  const d = Math.sqrt(k*k + e*e) + 0.0001;\n  const q = 3*Math.sin(k*2) + 0.3/k\n    + Math.sin(base.y/19)*k*(9 + 2*Math.sin(e*14 - d*3 + time*2));\n  const c = d - time;\n  out.x = q * params.curl + 50 * Math.cos(c);\n  out.y = (q * Math.sin(c) + d * 39 - 495) * params.stretch;\n  out.z = (Math.sin(i*.017 + time*1.25) * 34 + Math.cos(d*.18 + time) * 22) * params.depth;\n  out.size = (k*k > 15 ? 2 : 1) * params.dot;\n  h.palette('aurora', d*.03 + time*.05, out);\n}`;}
-  function notesCode(){return `Benchmark checks:\n\nPASS: no DOM/network/storage APIs.\nWARN: trig-heavy formula, expected.\nPASS: no per-frame Math.random in readable/Forge modes.\nPASS: deterministic variant seed.\n\nV2 Cool Pass:\n- scene recipes drive full art direction\n- palette worlds color formulas differently\n- trail materials reshape persistence\n- camera motion adds cinematic Forge depth`;}
+  function notesCode(){return `Benchmark checks:\n\nPASS: no DOM/network/storage APIs.\nWARN: trig-heavy formula, expected.\nPASS: no per-frame Math.random in readable/Forge modes.\nPASS: deterministic variant seed.\n\nV2 Cool Pass:\n- scene recipes drive full art direction\n- palette worlds color formulas differently\n- trail materials reshape persistence\n- camera motion adds cinematic Forge depth\n- Director Mode tours curated recipes\n- Formula Blend + Auto Morph create hybrids\n- Mouse Warp makes the canvas playable\n- Recipe JSON + local slots save/share states`;}
 })();
 </script>
 </body>

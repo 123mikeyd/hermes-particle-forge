@@ -52,3 +52,29 @@ Then visit `http://127.0.0.1:8765/`.
 - Mouse wheel zoom, drag pan, WASD/arrows pan
 
 Built as a single self-contained HTML file.
+
+## V3 Living Instrument pass
+
+Added after the V2 Cool Pass:
+
+- Director Mode auto-tour:
+  - Slow Tour
+  - Chaos Tour
+  - Ambient Tour
+- Fullscreen and Hide UI / Gallery mode
+- Mouse Warp interaction:
+  - Off
+  - Attract
+  - Repel
+  - Swirl
+- Formula Blend:
+  - Blend target formula
+  - Blend amount
+  - Auto Morph animation
+- Recipe tools:
+  - Copy Recipe JSON
+  - Load Recipe JSON
+  - Save Local
+  - Load Local
+
+Each curated scene starts from tuned safe parameters so the app does not load into ugly/random-looking defaults.
