@@ -36,12 +36,20 @@
   .control:first-of-type { border-top:0; }
   label { display:flex; justify-content:space-between; gap:12px; color:var(--ink); font-size:13px; margin-bottom:8px; }
   label span:last-child { color:var(--hot); }
-  input[type=range] { width:100%; accent-color:var(--hot); }
+  input[type=range] { width:100%; accent-color:var(--hot); cursor:pointer; }
+  input[type=range]:focus-visible, select:focus-visible, button:focus-visible { outline:2px solid var(--hot); outline-offset:2px; }
   .buttons { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
-  button { font-family:var(--mono); border:1px solid var(--line); color:var(--ink); background:rgba(96,247,255,.07); border-radius:12px; padding:10px 11px; cursor:pointer; transition:.18s ease; }
-  select { width:100%; font-family:var(--mono); color:var(--ink); background:rgba(0,0,0,.35); border:1px solid var(--line); border-radius:12px; padding:10px 11px; outline:none; }
-  button:hover, select:hover { border-color:rgba(105,255,183,.7); background:rgba(105,255,183,.1); box-shadow:0 0 24px rgba(105,255,183,.1); }
-  button.active { color:#00130c; background:var(--hot); border-color:var(--hot); }
+  button { font-family:var(--mono); border:1px solid var(--line); color:var(--ink); background:linear-gradient(180deg, rgba(96,247,255,.12), rgba(96,247,255,.04)); border-radius:12px; padding:10px 11px; cursor:pointer; transition:.18s ease; }
+  select { width:100%; font-family:var(--mono); color:var(--ink); background-color:#07111d; background-image:linear-gradient(180deg, #0b1b2b, #04080f); border:1px solid rgba(105,255,183,.35); border-radius:12px; padding:11px 34px 11px 12px; outline:none; cursor:pointer; box-shadow:inset 0 0 0 1px rgba(255,255,255,.03), 0 8px 22px rgba(0,0,0,.18); }
+  select option, select optgroup { background:#07111d; color:#e8f7ff; }
+  select option:checked { background:#123326; color:#69ffb7; }
+  select:hover { border-color:rgba(105,255,183,.8); background-image:linear-gradient(180deg, #0f263a, #06101d); box-shadow:0 0 24px rgba(105,255,183,.1); }
+  button:hover { border-color:rgba(105,255,183,.7); background:rgba(105,255,183,.1); box-shadow:0 0 24px rgba(105,255,183,.1); }
+  button.active { color:#00130c; background:var(--hot); border-color:var(--hot); font-weight:700; }
+  .sectionTitle { margin:16px 0 6px; padding:8px 10px; border:1px solid rgba(105,255,183,.18); border-radius:12px; color:var(--hot); background:rgba(105,255,183,.055); font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+  .quickStart { margin:8px 0 12px; padding:12px; border-radius:14px; color:#b9d8e8; background:rgba(96,247,255,.06); border:1px solid rgba(96,247,255,.16); font-size:12px; line-height:1.45; }
+  .fieldHelp { margin-top:7px; color:var(--muted); font-size:11px; line-height:1.35; }
+  .control.featured { padding:13px; margin:8px 0; border:1px solid rgba(105,255,183,.22); border-radius:14px; background:rgba(0,0,0,.24); }
   .readout { margin-top:14px; padding:12px; border-radius:14px; background:rgba(0,0,0,.32); border:1px solid rgba(120,220,255,.12); color:var(--muted); font-size:12px; line-height:1.5; }
   .readout b { color:var(--ink); font-weight:400; }
   .linter { margin-top:12px; display:grid; gap:6px; }
@@ -70,13 +78,16 @@
 </header>
 <main class="grid">
   <aside class="panel controls">
-    <h2>Dream Knobs</h2>
+    <h2>Control Panel</h2>
+    <div class="quickStart"><b>Start here:</b> choose a Scene Preset, then switch to Forge 3D Port. Use Palette / Trail / Camera for big visual changes. Sliders are fine tuning.</div>
+    <div class="sectionTitle">Render Mode</div>
     <div class="viewbar">
       <button id="modeOriginal" class="active">Original 2D</button>
       <button id="modeReadable">Readable 2D</button>
       <button id="modeForge">Forge 3D Port</button>
     </div>
-    <div class="control"><label>Scene Preset <span id="sceneVal">Manual</span></label><select id="scene">
+    <div class="sectionTitle">1. Finished Scenes</div>
+    <div class="control featured"><label>Scene Preset <span id="sceneVal">Manual</span></label><select id="scene">
       <option value="manual">Manual / Current Knobs</option>
       <option value="moonflower">Moonflower Engine</option>
       <option value="butterfly">Butterfly Reactor</option>
@@ -84,7 +95,8 @@
       <option value="dogstar">Dog Star Field</option>
       <option value="orchid">Strange Orchid</option>
       <option value="solar">Solar Phyllotaxis</option>
-    </select></div>
+    </select><div class="fieldHelp">One click recipe: sets formula, palette, trails, camera, and safe knob defaults.</div></div>
+    <div class="sectionTitle">2. Big Look Controls</div>
     <div class="control"><label>Palette World <span id="paletteVal">Aurora</span></label><select id="palette">
       <option value="aurora">Aurora</option>
       <option value="ghost">Ghost Glass</option>
@@ -94,7 +106,7 @@
       <option value="solar">Solar Flare</option>
       <option value="deepsea">Deep Sea Biolume</option>
       <option value="dogstar">Dog Star Gold</option>
-    </select></div>
+    </select><div class="fieldHelp">Changes the color identity of every formula.</div></div>
     <div class="control"><label>Trail Material <span id="trailModeVal">Clean</span></label><select id="trailMode">
       <option value="clean">Clean</option>
       <option value="ghost">Ghost Smear</option>
@@ -104,7 +116,7 @@
       <option value="ember">Fire Ember</option>
       <option value="vapor">Vaporwave Persistence</option>
       <option value="star">Star-map Accumulation</option>
-    </select></div>
+    </select><div class="fieldHelp">Changes persistence: clean dots, smoky exposure, CRT scanlines, embers, or star-map accumulation.</div></div>
     <div class="control"><label>Camera Motion <span id="cameraVal">Slow Orbit</span></label><select id="camera">
       <option value="orbit">Slow Orbit</option>
       <option value="locked">Locked Front</option>
@@ -113,7 +125,8 @@
       <option value="spiral">Spiral Dive</option>
       <option value="macro">Macro Inspection</option>
       <option value="kaleido">Kaleidoscope Orbit</option>
-    </select></div>
+    </select><div class="fieldHelp">Changes movement: locked, orbiting, breathing, drifting, diving, macro, or mirrored kaleidoscope.</div></div>
+    <div class="sectionTitle">3. Math Engine</div>
     <div class="control"><label>Formula Family <span id="formulaVal">Trig Bloom</span></label><select id="formula">
       <option value="trig">Trig Bloom / Yuruyurau</option>
       <option value="jelly">Aurora Jellyfish</option>
@@ -124,7 +137,8 @@
       <option value="firefly">Biolume Fireflies</option>
       <option value="polar">Polar Sine Orbitals</option>
       <option value="lorenz">Lorenz Spiral Attractor</option>
-    </select></div>
+    </select><div class="fieldHelp">The base equation. Use Scene Presets first; use this for experiments.</div></div>
+    <div class="sectionTitle">4. Fine Tuning</div>
     <div class="control"><label>Formula A <span id="formAVal">4.00</span></label><input id="formA" type="range" min="0.5" max="12" step="0.01" value="4"></div>
     <div class="control"><label>Formula B <span id="formBVal">8.00</span></label><input id="formB" type="range" min="0.5" max="24" step="0.01" value="8"></div>
     <div class="control"><label>Wave / Petals <span id="waveVal">6.00</span></label><input id="wave" type="range" min="0" max="18" step="0.01" value="6"></div>
@@ -134,24 +148,28 @@
     <div class="control"><label>Time Speed <span id="speedVal">1.00</span></label><input id="speed" type="range" min="0" max="3" step="0.01" value="1"></div>
     <div class="control"><label>Curl Strength <span id="curlVal">1.00</span></label><input id="curl" type="range" min="0.2" max="2.5" step="0.01" value="1"></div>
     <div class="control"><label>Vertical Stretch <span id="stretchVal">1.00</span></label><input id="stretch" type="range" min="0.4" max="2.2" step="0.01" value="1"></div>
-    <div class="control"><label>Depth Bloom <span id="depthVal">1.00</span></label><input id="depth" type="range" min="0" max="3" step="0.01" value="1"></div>
-    <div class="control"><label>Ghost Trails <span id="trailVal">0.00</span></label><input id="trail" type="range" min="0" max="0.92" step="0.01" value="0"></div>
-    <div class="control"><label>Dot Scale <span id="dotVal">1.00</span></label><input id="dot" type="range" min="0.4" max="3" step="0.01" value="1"></div>
+    <div class="control"><label>3D Depth <span id="depthVal">1.00</span></label><input id="depth" type="range" min="0" max="3" step="0.01" value="1"></div>
+    <div class="control"><label>Trail Strength <span id="trailVal">0.00</span></label><input id="trail" type="range" min="0" max="0.92" step="0.01" value="0"></div>
+    <div class="control"><label>Particle Size <span id="dotVal">1.00</span></label><input id="dot" type="range" min="0.4" max="3" step="0.01" value="1"></div>
+    <div class="sectionTitle">5. View / Export</div>
     <div class="control"><label>View Zoom <span id="zoomVal">1.00</span></label><input id="zoom" type="range" min="0.35" max="8" step="0.01" value="1"></div>
-    <div class="control"><label>View X <span id="panXVal">0</span></label><input id="panX" type="range" min="-1200" max="1200" step="1" value="0"></div>
-    <div class="control"><label>View Y <span id="panYVal">0</span></label><input id="panY" type="range" min="-1600" max="1600" step="1" value="0"></div>
+    <div class="control"><label>Pan X <span id="panXVal">0</span></label><input id="panX" type="range" min="-1200" max="1200" step="1" value="0"></div>
+    <div class="control"><label>Pan Y <span id="panYVal">0</span></label><input id="panY" type="range" min="-1600" max="1600" step="1" value="0"></div>
     <div class="buttons">
       <button id="pauseBtn">Pause</button>
       <button id="resetBtn">Reset Time</button>
       <button id="resetViewBtn">Reset View</button>
       <button id="exportBtn">Export PNG</button>
       <button id="randomBtn">Variant</button>
-      <button id="applySceneBtn">Apply Scene</button>
+      <button id="applySceneBtn">Load Scene</button>
     </div>
     <div class="readout">
-      <b>Formula Oracle</b><br>
-Choose a Scene Preset to art-direct the whole machine: formula, palette, trail material, camera choreography, and best-known knob values. Manual keeps your current knobs.<br><br>
-      <b>Navigation:</b> mouse wheel zooms, click-drag pans, WASD/arrow keys move the view. Try Forge 3D Port + Spiral Dive + Long Exposure.
+      <b>How to use</b><br>
+1. Pick a finished Scene Preset.<br>
+2. Click Forge 3D Port if it is not already active.<br>
+3. Change Palette, Trail, or Camera for big changes.<br>
+4. Use Formula / sliders only when you want to experiment.<br><br>
+      <b>Navigation:</b> mouse wheel zooms, click-drag pans, WASD/arrow keys move the view.
     </div>
     <div class="linter">
       <div class="pill good"><span>Safety</span><span>PASS</span></div>
