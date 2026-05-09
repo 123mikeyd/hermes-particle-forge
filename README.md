@@ -4,7 +4,7 @@ A local-first generative particle-art instrument for turning compact mathematica
 
 Particle Forge is built as a single-file browser app: no account, no build step, no server requirement, and no cloud dependency. Open it, choose a curated scene, perform the system with camera/palette/trail controls, then export stills or exact recipe JSON.
 
-Live demo: https://123mikeyd.github.io/particle-forge-v2-cool-pass/
+Live demo: https://123mikeyd.github.io/hermes-particle-forge/
 
 ## Preview
 
