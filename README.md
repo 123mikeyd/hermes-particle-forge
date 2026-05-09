@@ -121,3 +121,14 @@ This is an early public art-tool prototype. It is already pretty frickin' cool, 
 ## License
 
 MIT
+
+## Precision defaults pass
+
+Formula selection now loads crisp, readable, formula-specific defaults. These baselines intentionally use clean trails, locked camera, restrained depth, lower particle sizes, and slower time speeds so the mathematical structure is legible before adding bloom/trails/camera motion.
+
+Notable fixes:
+
+- Lorenz Spiral Attractor default is slower and clearer.
+- Polar Sine Orbitals default is less fuzzy and less over-bloomed.
+- All formula families now reset to understandable baseline parameters when selected.
+- Art-directed bloom/trails remain available as optional controls rather than being forced on default load.

@@ -112,7 +112,7 @@
       <option value="dogstar">Dog Star Field</option>
       <option value="orchid">Strange Orchid</option>
       <option value="solar">Solar Phyllotaxis</option>
-    </select><div class="fieldHelp">One click recipe: sets formula, palette, trails, camera, and safe knob defaults.</div></div>
+    </select><div class="fieldHelp">One click recipe: loads a precise readable baseline for that scene/formula.</div></div>
     <div class="sectionTitle">2. Big Look Controls</div>
     <div class="control"><label>Palette World <span id="paletteVal">Aurora</span></label><select id="palette">
       <option value="aurora">Aurora</option>
@@ -161,7 +161,7 @@
       <option value="firefly">Biolume Fireflies</option>
       <option value="polar">Polar Sine Orbitals</option>
       <option value="lorenz">Lorenz Spiral Attractor</option>
-    </select><div class="fieldHelp">The base equation. Use Scene Presets first; use this for experiments.</div></div>
+    </select><div class="fieldHelp">The base equation. Selecting a formula now loads crisp readable defaults.</div></div>
     <div class="control featured"><label>Formula Blend <span id="blendEnabledVal">Off</span></label><select id="blendEnabled">
       <option value="off">Off</option>
       <option value="on">On</option>
@@ -194,7 +194,7 @@
     <div class="control"><label>Vertical Stretch <span id="stretchVal">1.00</span></label><input id="stretch" type="range" min="0.4" max="2.2" step="0.01" value="1"></div>
     <div class="control"><label>3D Depth <span id="depthVal">1.00</span></label><input id="depth" type="range" min="0" max="3" step="0.01" value="1"></div>
     <div class="control"><label>Trail Strength <span id="trailVal">0.00</span></label><input id="trail" type="range" min="0" max="0.92" step="0.01" value="0"></div>
-    <div class="control"><label>Particle Size <span id="dotVal">1.00</span></label><input id="dot" type="range" min="0.4" max="3" step="0.01" value="1"></div>
+    <div class="control"><label>Particle Size <span id="dotVal">1.00</span></label><input id="dot" type="range" min="0.15" max="3" step="0.01" value="1"></div>
     <div class="sectionTitle">5. View / Export</div>
     <div class="control"><label>View Zoom <span id="zoomVal">1.00</span></label><input id="zoom" type="range" min="0.35" max="8" step="0.01" value="1"></div>
     <div class="control"><label>Pan X <span id="panXVal">0</span></label><input id="panX" type="range" min="-1200" max="1200" step="1" value="0"></div>
@@ -363,6 +363,7 @@ This benchmark proves:
   els.scene.addEventListener('change', () => applyScene(els.scene.value));
   els.director.addEventListener('change', () => { directorState.last = 0; if (els.director.value !== 'off') applyScene(directorSceneList()[0], { keepDirector:true }); });
   els.blendEnabled.addEventListener('change', () => applyBlendDefaults());
+  els.formula.addEventListener('change', () => applyFormulaDefault(els.formula.value));
   updateVals();
   refreshCodePanels();
 
@@ -544,13 +545,38 @@ This benchmark proves:
     deepsea: { bg:[0,5,13],  haze:'rgba(0,70,100,.12)', base:188, spread:82, sat:90, light:44, accent:92 },
     dogstar: { bg:[8,5,0],   haze:'rgba(255,190,70,.11)', base:43,  spread:34, sat:88, light:58, accent:116 }
   };
+  const FORMULA_DEFAULTS = {
+    trig:      { palette:'aurora', trailMode:'clean', camera:'locked', count:10000, formA:4.0, formB:8.0,  wave:6.0,  twist:0,    morph:1.0,  speed:.55, curl:1.0, stretch:1.0, depth:.55, trail:0,    dot:.72, zoom:1.0,  panX:0, panY:0, mouseMode:'off' },
+    polar:     { palette:'ghost',  trailMode:'clean', camera:'locked', count:14000, formA:4.0, formB:8.0,  wave:6.0,  twist:0,    morph:.12,  speed:.32, curl:1.0, stretch:1.0, depth:.35, trail:0,    dot:.38, zoom:1.15, panX:0, panY:0, mouseMode:'off' },
+    lorenz:    { palette:'ghost',  trailMode:'clean', camera:'locked', count:12000, formA:4.0, formB:8.0,  wave:6.0,  twist:0,    morph:.55,  speed:.18, curl:1.0, stretch:1.0, depth:.45, trail:0,    dot:.30, zoom:1.45, panX:0, panY:0, mouseMode:'off' },
+    jelly:     { palette:'deepsea',trailMode:'clean', camera:'locked', count:12000, formA:3.2, formB:9.5,  wave:6.8,  twist:.25,  morph:.9,   speed:.28, curl:1.0, stretch:1.0, depth:.5,  trail:0,    dot:.62, zoom:1.05, panX:0, panY:-30, mouseMode:'off' },
+    rose:      { palette:'infrared',trailMode:'clean',camera:'locked', count:14000, formA:4.0, formB:7.0,  wave:5.0,  twist:0,    morph:.75,  speed:.25, curl:1.0, stretch:1.0, depth:.35, trail:0,    dot:.52, zoom:1.25, panX:0, panY:0, mouseMode:'off' },
+    lissajous: { palette:'aurora', trailMode:'clean', camera:'locked', count:12000, formA:3.0, formB:4.0,  wave:5.0,  twist:.4,   morph:.65,  speed:.22, curl:1.0, stretch:1.0, depth:.35, trail:0,    dot:.46, zoom:1.18, panX:0, panY:0, mouseMode:'off' },
+    phylo:     { palette:'solar',  trailMode:'clean', camera:'locked', count:18000, formA:4.0, formB:10.0, wave:2.2,  twist:.15,  morph:.8,   speed:.16, curl:1.0, stretch:1.0, depth:.35, trail:0,    dot:.36, zoom:1.2,  panX:0, panY:0, mouseMode:'off' },
+    dejong:    { palette:'oil',    trailMode:'clean', camera:'locked', count:16000, formA:5.2, formB:8.5,  wave:7.0,  twist:-.8,  morph:1.0,  speed:.18, curl:1.0, stretch:1.0, depth:.4,  trail:0,    dot:.34, zoom:1.2,  panX:0, panY:0, mouseMode:'off' },
+    firefly:   { palette:'dogstar',trailMode:'clean', camera:'locked', count:10000, formA:3.0, formB:6.0,  wave:5.0,  twist:0,    morph:1.0,  speed:.35, curl:1.0, stretch:1.0, depth:.4,  trail:0,    dot:.78, zoom:1.0,  panX:0, panY:0, mouseMode:'off' }
+  };
+  function applyFormulaDefault(formula) {
+    const recipe = FORMULA_DEFAULTS[formula];
+    if (!recipe) return;
+    els.scene.value = 'manual';
+    els.director.value = 'off';
+    els.blendEnabled.value = 'off';
+    els.autoMorph.value = 'off';
+    els.blend.value = .35;
+    for (const [k,v] of Object.entries(recipe)) if (els[k]) els[k].value = v;
+    els.formula.value = formula;
+    t = 0;
+    updateVals(); refreshCodePanels();
+  }
+
   const SCENES = {
-    moonflower:{ formula:'polar',  palette:'ghost',   trailMode:'star',  camera:'kaleido', count:9000, formA:4.6, formB:10.5, wave:11.8, twist:1.6, morph:1.45, speed:.72, curl:.9, stretch:1,   depth:1.55, trail:.46, dot:.44, zoom:1.18 },
-    butterfly: { formula:'lorenz', palette:'infrared',trailMode:'long',  camera:'spiral',  count:12000, formA:7.3, formB:10.2, wave:7.4,  twist:.9,  morph:.82, speed:.42, curl:1,   stretch:1.05, depth:2.2, trail:.78, dot:.62, zoom:.92 },
-    aquarium:  { formula:'jelly',  palette:'deepsea', trailMode:'ghost', camera:'drift',   count:16000, formA:3.8, formB:13.4, wave:9.5,  twist:1.1,  morph:1.2, speed:.52, curl:.8,  stretch:1.2,  depth:1.5, trail:.74, dot:1.1, zoom:1.05 },
-    dogstar:   { formula:'firefly',palette:'dogstar', trailMode:'star',  camera:'breath',  count:22000, formA:4.4, formB:7.6,  wave:13.8, twist:0,    morph:2.2, speed:.68, curl:.75, stretch:1,    depth:1.4, trail:.88, dot:1.18, zoom:1.0 },
-    orchid:    { formula:'dejong', palette:'oil',     trailMode:'vapor', camera:'orbit',   count:18000, formA:5.8, formB:12.6, wave:13.2, twist:-2.4, morph:1.7, speed:.62, curl:1.2, stretch:1.05, depth:1.8, trail:.7,  dot:.78, zoom:1.18 },
-    solar:     { formula:'phylo',  palette:'solar',   trailMode:'ember', camera:'macro',   count:24000, formA:5.2, formB:17.5, wave:8.8,  twist:.55, morph:1.35,speed:.5,  curl:1,   stretch:1,    depth:1.65,trail:.72, dot:.72, zoom:1.28 }
+    moonflower:{ formula:'polar',  palette:'ghost',   trailMode:'clean', camera:'locked',  count:14000, formA:4.0, formB:8.0,  wave:6.0,  twist:0,    morph:.12, speed:.32, curl:1,  stretch:1,    depth:.35, trail:0,    dot:.38, zoom:1.15 },
+    butterfly: { formula:'lorenz', palette:'ghost',   trailMode:'clean', camera:'locked',  count:12000, formA:4.0, formB:8.0,  wave:6.0,  twist:0,    morph:.55, speed:.18, curl:1,  stretch:1,    depth:.45, trail:0,    dot:.30, zoom:1.45 },
+    aquarium:  { formula:'jelly',  palette:'deepsea', trailMode:'clean', camera:'locked',  count:12000, formA:3.2, formB:9.5,  wave:6.8,  twist:.25,  morph:.9,  speed:.28, curl:1,  stretch:1,    depth:.5,  trail:0,    dot:.62, zoom:1.05, panY:-30 },
+    dogstar:   { formula:'firefly',palette:'dogstar', trailMode:'clean', camera:'locked',  count:10000, formA:3.0, formB:6.0,  wave:5.0,  twist:0,    morph:1.0, speed:.35, curl:1,  stretch:1,    depth:.4,  trail:0,    dot:.78, zoom:1.0 },
+    orchid:    { formula:'dejong', palette:'oil',     trailMode:'clean', camera:'locked',  count:16000, formA:5.2, formB:8.5,  wave:7.0,  twist:-.8,  morph:1.0, speed:.18, curl:1,  stretch:1,    depth:.4,  trail:0,    dot:.34, zoom:1.2 },
+    solar:     { formula:'phylo',  palette:'solar',   trailMode:'clean', camera:'locked',  count:18000, formA:4.0, formB:10.0, wave:2.2,  twist:.15, morph:.8, speed:.16, curl:1,   stretch:1,    depth:.35, trail:0,   dot:.36, zoom:1.2 }
   };
   function applyScene(name, opts={}) {
     if (!SCENES[name]) { updateVals(); refreshCodePanels(); return; }
@@ -600,7 +626,7 @@ This benchmark proves:
 
   let lorenzCache = { key: '', points: [] };
   function ensureLorenz(p, tt) {
-    const frameT = Math.floor(tt * 120);
+    const frameT = Math.floor(tt * 24);
     const key = `${p.count}|${frameT}|${p.formA.toFixed(2)}|${p.formB.toFixed(2)}|${p.wave.toFixed(2)}|${p.twist.toFixed(2)}|${p.morph.toFixed(2)}`;
     if (lorenzCache.key === key) return lorenzCache.points;
     const pts = new Array(p.count);
@@ -716,7 +742,7 @@ This benchmark proves:
       const spokes = Math.max(1, Math.floor(p.count / 2));
       const j = Math.floor(x / 2);
       const a2 = (j / spokes) * Math.PI * 2 + T * 0.08;
-      const jitter = (hash(x + p.seed) - 0.5) * (0.018 + M * 0.012);
+      const jitter = (hash(x + p.seed) - 0.5) * (0.004 + M * 0.003);
       const waveFreq = (6 + band * (3 + Math.sin(tt))) * Math.max(0.2, W / 6 || 1);
       const ridge = (Math.sin(a2 * waveFreq + tt) * 0.3 + 0.1) / band;
       const l = Math.max(0.025, Math.abs(ridge) + jitter + (hash(x * 5 + 4) - 0.5) * 0.025);
@@ -725,7 +751,7 @@ This benchmark proves:
       const k2 = Math.exp(-40 * Math.abs(l - band / 4));
       const radius = l * (250 + B * 8) * (0.85 + M * 0.12);
       const pulse = 1 + 0.08 * Math.sin(tt * 1.7 + a2 * A);
-      return { x: Math.cos(a2) * radius * pulse, y: Math.sin(a2) * radius * pulse, k:k2, e:e2, d, q:radius, c:a2, size: 0.45 + d * 2.6 + k2 * 1.2 };
+      return { x: Math.cos(a2) * radius * pulse, y: Math.sin(a2) * radius * pulse, k:k2, e:e2, d, q:radius, c:a2, size: 0.25 + d * 1.6 + k2 * 0.7 };
     }
 
     if (p.formula === 'lorenz') {
