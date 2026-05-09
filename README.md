@@ -1,134 +1,100 @@
-# Particle Forge V2 Cool Pass
+# Hermes Particle Forge
 
-A standalone browser-based math-art particle forge: compact equations become art-directed particle worlds with scene recipes, palettes, trails, camera choreography, mouse interaction, formula blending, Director Mode, Gallery Mode, and recipe save/load.
+A local-first generative particle-art instrument for turning compact mathematical formulas into cinematic, interactive particle worlds.
 
-Open `index.html` directly or serve it locally:
+Particle Forge is built as a single-file browser app: no account, no build step, no server requirement, and no cloud dependency. Open it, choose a curated scene, perform the system with camera/palette/trail controls, then export stills or exact recipe JSON.
+
+Live demo: https://123mikeyd.github.io/particle-forge-v2-cool-pass/
+
+## Preview
+
+The repository includes a short motion capture at `assets/demo.mp4`.
+
+## Highlights
+
+- Curated scene presets: Moonflower Engine, Butterfly Reactor, Haunted Aquarium, Dog Star Field, Strange Orchid, and Solar Phyllotaxis.
+- Formula families: Trig Bloom, Aurora Jellyfish, Rose/Rhodonea Bloom, Lissajous Orchid, Golden Phyllotaxis, De Jong Attractor, Biolume Fireflies, Polar Sine Orbitals, and Lorenz Spiral Attractor.
+- Performance-oriented Canvas2D renderer with up to 40,000 particles.
+- Director Mode auto-tours for ambient, slow, and chaotic presentations.
+- Palette, trail-material, camera-motion, mouse-warp, formula-blending, and auto-morph controls.
+- Gallery mode and fullscreen mode for clean demos/screen recordings.
+- Recipe JSON copy/load plus local browser save/load.
+- PNG export for still artwork.
+- Keyboard and mouse navigation: `G` gallery, `F` Forge 3D Port, `Space` pause, `WASD`/arrows pan, mouse wheel zoom, drag pan.
+
+## Quick start
+
+Option 1: open `index.html` directly in a browser.
+
+Option 2: serve locally.
 
 ```bash
 python3 -m http.server 8765
 ```
 
-Then visit `http://127.0.0.1:8765/`.
+Then visit:
 
-## What it does
+```text
+http://127.0.0.1:8765/
+```
 
-Particle Forge turns small mathematical sketches into playable visual worlds. Pick a curated scene, switch to Forge 3D Port, then use Palette, Trail, Camera, Mouse Warp, Formula Blend, and Director Mode to perform the artwork live.
+## Recommended first run
 
-## Features
+1. Pick a `Scene Preset`.
+2. Switch to `Forge 3D Port`.
+3. Try `Director Mode` → `Slow Tour`.
+4. Toggle `Hide UI / Gallery` or press `G`.
+5. Use `Formula Blend` + `Auto Morph` for hybrid math creatures.
+6. Export a PNG or copy Recipe JSON when you find a good state.
 
-- Formula worlds:
-  - Trig Bloom
-  - Aurora Jellyfish
-  - Rose / Rhodonea Bloom
-  - Lissajous Orchid
-  - Golden Phyllotaxis
-  - De Jong Attractor
-  - Biolume Fireflies
-  - Polar Sine Orbitals
-  - Lorenz Spiral Attractor
-- Curated Scene Presets:
-  - Moonflower Engine
-  - Butterfly Reactor
-  - Haunted Aquarium
-  - Dog Star Field
-  - Strange Orchid
-  - Solar Phyllotaxis
-- Palette Worlds:
-  - Aurora
-  - Ghost Glass
-  - Infrared
-  - CRT Bloom
-  - Oil Slick
-  - Solar Flare
-  - Deep Sea Biolume
-  - Dog Star Gold
-- Trail Materials:
-  - Clean
-  - Ghost Smear
-  - Long Exposure
-  - CRT Phosphor
-  - Ink Bleed
-  - Fire Ember
-  - Vaporwave Persistence
-  - Star-map Accumulation
-- Camera Motion:
-  - Slow Orbit
-  - Locked Front
-  - Breathing Zoom
-  - Handheld Drift
-  - Spiral Dive
-  - Macro Inspection
-  - Kaleidoscope Orbit
-- Director Mode auto-tour:
-  - Slow Tour
-  - Chaos Tour
-  - Ambient Tour
-- Fullscreen and Hide UI / Gallery mode
-- Mouse Warp interaction:
-  - Attract
-  - Repel
-  - Swirl
-- Formula Blend:
-  - Blend target formula
-  - Blend amount
-  - Auto Morph animation
-- Recipe tools:
-  - Copy Recipe JSON
-  - Load Recipe JSON
-  - Save Local
-  - Load Local
-- PNG export
-- Mouse wheel zoom, drag pan, WASD/arrows pan
+## Repository contents
 
-Each curated scene starts from tuned safe parameters so the app does not load into ugly/random-looking defaults.
+```text
+index.html                              Standalone Particle Forge app
+assets/demo.mp4                         Short V2 demo capture
+docs/product-plan.md                    Product direction and long-range roadmap
+docs/research-and-architecture.md       Research notes and architecture decisions
+docs/formula-test-pack.md               Candidate formula scenes and benchmark ideas
+docs/benchmark-001-yuruyurau-trig-bloom.html
+                                        Original benchmark preserved as a standalone page
+LICENSE                                 MIT license
+```
 
-## Controls
+## Design principles
 
-- Pick `Scene Preset` first.
-- Use `Forge 3D Port` for the full particle-world version.
-- Use `Director Mode` for an automatic curated tour.
-- Use `Hide UI / Gallery` or `Fullscreen` for presentation.
-- Move the mouse over the canvas when Mouse Warp is enabled.
-- Use Formula Blend + Auto Morph for hybrid math creatures.
-- Use Recipe JSON to copy/share/save exact states.
-
-Keyboard shortcuts:
-
-- `G`: toggle Gallery Mode
-- `F`: switch to Forge 3D Port
-- `Space`: pause/play
-- `WASD` / arrow keys: pan view
-
-## Credits / inspiration
-
-Made with Hermes Agent and Mike.
-
-Inspired by compact mathematical art, shader-toy-style fragment formulas, tweet-sized p5 sketches, and strange-attractor / polar-orbital generative art traditions.
-
-Specific inspirations preserved in the app include:
-
-- Yuruyurau-style trig bloom compact p5 math-art.
-- User-provided polar sine orbital GLSL-style formula.
-- User-provided Lorenz spiral p5 formula.
-- Classic mathematical families including rose/rhodonea curves, Lissajous figures, phyllotaxis, De Jong attractors, and Lorenz-style attractors.
-
-If you recognize a compact formula lineage here and want a more precise attribution, open an issue/PR and we will gladly improve the credit trail.
+- Beauty before feature count.
+- Local-first and private by default.
+- Mathematical structure should remain readable before bloom/trails/camera effects are layered on.
+- Performance is part of the art: visible particle counts, tuned defaults, and no random-looking startup state.
+- Export matters: stills, recipes, and standalone HTML should be easy to keep or share.
 
 ## Status
 
-This is an early public art-tool prototype. It is already pretty frickin' cool, and it will get better.
+Prototype / art-tool workbench. The app is already usable as a standalone generative-art toy and as a benchmark bed for future Hermes-assisted formula generation.
+
+Near-term roadmap:
+
+- Compress the demo video into a lightweight README-friendly GIF/WebM.
+- Split the single-file prototype into `static/js`, `static/css`, and reusable formula modules.
+- Add project-file save/load beyond browser local storage.
+- Add WebGL/Three.js renderer path for higher particle counts.
+- Add Hermes prompt-to-formula workflow once the local API contract stabilizes.
+
+## Credits and inspiration
+
+Created by Mike with Hermes Agent.
+
+Inspired by compact mathematical art, ShaderToy-style fragment formulas, tweet-sized p5 sketches, and strange-attractor / polar-orbital generative art traditions.
+
+Specific inspirations preserved in the app and docs include:
+
+- Yuruyurau-style compact p5 trig-bloom math art.
+- User-provided polar sine orbital GLSL-style formula.
+- User-provided Lorenz spiral p5 formula.
+- Classic mathematical families: rose/rhodonea curves, Lissajous figures, phyllotaxis, De Jong attractors, and Lorenz-style attractors.
+
+If a compact formula lineage needs more precise attribution, open an issue or PR and the credit trail can be improved.
 
 ## License
 
-MIT
-
-## Precision defaults pass
-
-Formula selection now loads crisp, readable, formula-specific defaults. These baselines intentionally use clean trails, locked camera, restrained depth, lower particle sizes, and slower time speeds so the mathematical structure is legible before adding bloom/trails/camera motion.
-
-Notable fixes:
-
-- Lorenz Spiral Attractor default is slower and clearer.
-- Polar Sine Orbitals default is less fuzzy and less over-bloomed.
-- All formula families now reset to understandable baseline parameters when selected.
-- Art-directed bloom/trails remain available as optional controls rather than being forced on default load.
+MIT. See `LICENSE`.

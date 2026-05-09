@@ -1,0 +1,27 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+
+# Python/local servers
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node/tooling if the prototype is split later
+node_modules/
+dist/
+build/
+
+# Local exports and scratch captures
+exports/
+projects/
+*.log
+*.zip
+*.patch
+
+# Keep huge raw captures out of git; commit optimized media only.
+*.gif
+!assets/*.gif
